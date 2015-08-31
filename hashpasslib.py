@@ -63,7 +63,12 @@ def hash(string):
 
 def is_good_pass(password):
     """ If the password is 20 characters and inculdes a symbol, it is good. """
-    return reduce(lambda a,b: a or b, [s in password for s in SYMBOLS])
+    r_or = lambda a,b: a or b
+    r_and = lambda a,b: a and b
+    return reduce(r_and, [
+        reduce(r_or, [c in password for c in set])
+        for set in (LETTERS, NUMBERS, SYMBOLS)])
+
 
 def make_password(website):
     """
@@ -89,17 +94,19 @@ def _test_to_chars():
         print "Failed test 3"
 
 def _test_is_good_pass():
-    if not is_good_pass("#"):
+    if not is_good_pass("a4#"):
         print "Failed test 4"
     if is_good_pass(""):
         print "Failed test 5"
-    if not is_good_pass("ooooo#oo"):
+    if not is_good_pass("oooo6o#oo"):
         print "Failed test 6"
     if is_good_pass("oeuoeuOOO2343"):
         print "Failed test 7"
 
 def _test_make_password():
-    if not make_password("a","b") == "P4{tRc6X3q}5)bCw}su=":
+    global session_master
+    session_master = "a"
+    if not make_password("b") == "P4{tRc6X3q}5)bCw}su=":
         print "Failed test 8"
 
 def run_tests():
