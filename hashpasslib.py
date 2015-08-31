@@ -19,7 +19,7 @@ def save_master(master_plaintext):
     """ Saves the SHA512 of master_plaintext to MASTER_PW_PATH. """
     os.makedirs(MASTER_PW_DIR)
     with open(MASTER_PW_PATH, 'w') as f:
-        f.write(hashlib.sha512(master_plaintext).hexdigest()
+        f.write(hashlib.sha512(master_plaintext).hexdigest())
     session_master = master_plaintext
 
 def is_correct_master(password):
