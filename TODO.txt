@@ -1,6 +1,3 @@
-# hashpass-gui.py bugs
-[ ] Quit with ctrl-q, ctrl-c, ctrl-d
-
 # enhancements
 [ ] Clear the password from the clipboard (both UIs)
 [ ] Package and/or bash script to run from web

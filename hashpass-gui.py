@@ -19,6 +19,10 @@ class HashPass(Tkinter.Frame, object):
     self.parent = parent
     self.parent.title("HashPass")
 
+    # Keyboard shortcuts for quit.
+    for keys in ["<Control-q>", "<Control-c>", "<Control-d>", "<Control-w>"]:
+      self.bind_all(keys, lambda *args: self.on_kb_quit())
+
     self.font_mono = tkFont.Font(family="Monospace", size=9)
 
     self.entry_var = Tkinter.StringVar()
@@ -70,6 +74,10 @@ class HashPass(Tkinter.Frame, object):
       self.entry_var.set("")
     self.entry_var.set("")
 
+  def on_kb_quit(self):
+    """When a keyboard shortcut to quit is pressed."""
+    self.quit()
+
   def heres_a_master(self, master):
     if self.need_new_master:
       save_master(master)
@@ -100,7 +108,6 @@ def copy_to_clipboard(string):
 
 
 if __name__ == "__main__":
-  print "Started."
   root = Tkinter.Tk()
   HashPass(root)
   root.mainloop()
