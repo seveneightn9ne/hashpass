@@ -48,7 +48,6 @@ def _chunks(lst, size=3):
     r = []
     for i in range(len(lst)/size):
         r.append(lst[3*i:3*i + 3])
-    print r
     return r
 
 def hash(password, website):
