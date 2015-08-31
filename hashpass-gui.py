@@ -27,7 +27,7 @@ class HashPass(Tkinter.Frame, object):
     self.entry = Tkinter.Entry(self,
         width=40,
         textvariable=self.entry_var,
-        show=False,
+        show="*",
         font=self.font_mono)
     self.entry.grid(sticky=Tkinter.W)
     self.entry.focus_set()
@@ -68,6 +68,7 @@ class HashPass(Tkinter.Frame, object):
       self.heres_a_master(self.entry_var.get())
     else:
       self.entry_var.set("")
+    self.entry_var.set("")
 
   def heres_a_master(self, master):
     if self.need_new_master:
@@ -78,7 +79,10 @@ class HashPass(Tkinter.Frame, object):
       if is_correct_master(master):
         self.label_clipboard.config(
             text=("Enter the website name to generate a password."))
-        self.entry.config(show=True)
+        # Clear the password.
+        self.entry_var.set("")
+        # Disable password hiding.
+        self.entry.config(show="")
         self.need_master = False
       else:
         self.label_clipboard.config(text=(
