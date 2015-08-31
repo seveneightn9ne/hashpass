@@ -2,54 +2,81 @@
 """
 A GUI Utility for taking the SHA1 hash of a string.
 
-Enter a string and press enter or press the button.
-The string will be hashed and the result will be displayed
-and copied to the clipboard.
+Enter a string. The hash will be shown and copied to the clipboard.
+Press Enter to clear the entry. The clipboard will not be cleared.
 """
 
 import hashlib
 import Tkinter
-from Tkinter import Tk
+import tkFont
 
-def hash(input):
+
+class Sha1it(Tkinter.Frame, object):
+  """Application main frame.
+  (As in the primary frame, not like a supercompute or anything.)
+  """
+  def __init__(self, parent):
+    super(Sha1it, self).__init__(parent)
+    self.parent = parent
+    self.parent.title("Sha1it")
+
+    self.font_mono = tkFont.Font(family="Monospace", size=9)
+
+    self.entry_var = Tkinter.StringVar()
+    self.entry_var.trace("w", lambda *args: self.on_change_entry())
+
+    self.entry = Tkinter.Entry(self,
+        width=40,
+        textvariable=self.entry_var,
+        font=self.font_mono)
+    self.entry.grid(sticky=Tkinter.W)
+    self.entry.focus_set()
+    self.entry.bind("<Return>", lambda *args: self.on_press_enter())
+
+    self.label_hash = Tkinter.Label(self,
+        text="ab3246947813fd6df239c589f9c8a4d3d5826496",
+        font=self.font_mono)
+    self.label_hash.grid(sticky=Tkinter.W)
+
+    self.label_clipboard = Tkinter.Label(self,
+        text="Enter text to get the sha1.",
+        font=self.font_mono)
+    self.label_clipboard.grid(sticky=Tkinter.W)
+
+    self.pack()
+
+  def on_change_entry(self):
+    plain = self.entry_var.get()
+    if len(plain) == 0:
+      return
+    hashed = hash_sha1(plain)
+    self.label_hash.config(text=hashed)
+    copy_to_clipboard(hashed)
+    self.label_clipboard.config(text=(
+      "Copied to clipboard. "
+      "Enter to clear."))
+
+
+  def on_press_enter(self):
+    self.entry_var.set("")
+
+
+def hash_sha1(input):
   """Take the sha1 hash of a thing."""
   return hashlib.sha1(input).hexdigest()
 
+
 def copy_to_clipboard(string):
    """Copy a string the system clipboard."""
-   tk = Tk()
+   tk = Tkinter.Tk()
    tk.withdraw()
    tk.clipboard_clear()
    tk.clipboard_append(string)
    tk.destroy()
 
-class Sha1it(Tkinter.Frame, object):
-  def __init__(self, parent):
-    super(Sha1it, self).__init__(parent)
-    self.parent = parent
-
-    self.parent.title("Sha1it")
-
-    self.entry = Tkinter.Entry(self)
-    self.entry.pack(side=Tkinter.LEFT)
-
-    self.button_generate = Tkinter.Button(self,
-      text="Sha1",
-      command=self.click_generate)
-    self.button_generate.pack()
-
-    self.pack(fill=Tkinter.BOTH, expand=1)
-
-  def click_generate(self):
-    input = self.entry.get()
-    hashed = hash(input)
-    self.entry.delete(0, Tkinter.END)
-    self.entry.insert(0, hashed)
-    copy_to_clipboard(hashed)
-
 
 if __name__ == "__main__":
-  root = Tk()
-  root.geometry("250x150")
+  print "Started."
+  root = Tkinter.Tk()
   Sha1it(root)
   root.mainloop()
