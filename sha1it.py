@@ -13,7 +13,7 @@ import tkFont
 
 class Sha1it(Tkinter.Frame, object):
   """Application main frame.
-  (As in the primary frame, not like a supercompute or anything.)
+  (As in the primary frame, not like a supercomputer or anything.)
   """
   def __init__(self, parent):
     super(Sha1it, self).__init__(parent)
@@ -43,7 +43,7 @@ class Sha1it(Tkinter.Frame, object):
         font=self.font_mono)
     self.label_clipboard.grid(sticky=Tkinter.W)
 
-    self.pack()
+    self.grid()
 
   def on_change_entry(self):
     plain = self.entry_var.get()
@@ -55,7 +55,6 @@ class Sha1it(Tkinter.Frame, object):
     self.label_clipboard.config(text=(
       "Copied to clipboard. "
       "Enter to clear."))
-
 
   def on_press_enter(self):
     self.entry_var.set("")
