@@ -86,11 +86,6 @@ class HashPass(Tkinter.Frame, object):
         self.entry_var.set("")
 
 
-def hash_sha1(input):
-  """Take the sha1 hash of a thing."""
-  return hashlib.sha1(input).hexdigest()
-
-
 def copy_to_clipboard(string):
    """Copy a string the system clipboard."""
    tk = Tkinter.Tk()
