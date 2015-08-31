@@ -16,7 +16,7 @@ def get_password():
     while not is_correct_master(pw):
         print "That doesn't match the stored master."
         pw = getpass.getpass("Try again: ")
-    return pw
+    # when is_correct_master(pw) it will be saved
 
 def send_to_clipboard(text):
     pyperclip.copy(text)
@@ -24,7 +24,7 @@ def send_to_clipboard(text):
 def cli():
     """ runs the app with the CLI as the user interface """
     init()
-    p = get_password()
+    get_password()
     if len(sys.argv) >= 2:
         w = sys.argv[1]
         result = make_password(w)
