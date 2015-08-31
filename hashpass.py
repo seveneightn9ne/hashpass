@@ -30,8 +30,7 @@ def cli():
     result = hash(p, w)
     send_to_clipboard(result)
     print "The password is in your clipboard."
+
 if __name__ == "__main__":
     cli()
-    _test_to_chars()
-
 
