@@ -1,3 +1,8 @@
 # hashpass-gui.py bugs
 [ ] Text doesn't show when inputting website.
 [ ] Quit with ctrl-q, ctrl-c, ctrl-d
+
+# enhancements
+[ ] Clear the password from the clipboard (both UIs)
+[ ] Package and/or bash script to run from web
+[ ] Installer
