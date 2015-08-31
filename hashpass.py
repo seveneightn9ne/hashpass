@@ -24,12 +24,23 @@ def send_to_clipboard(text):
 def cli():
     """ runs the app with the CLI as the user interface """
     init()
-    w = raw_input("Website name: ") if len(sys.argv) < 2 else sys.argv[1]
     p = get_password()
-    #result = hashlib.sha1((w+p).encode()).hexdigest()
-    result = hash(p, w)
-    send_to_clipboard(result)
-    print "The password is in your clipboard."
+    if len(sys.argv) >= 2:
+        w = sys.argv[1]
+        result = hash(p, w)
+        send_to_clipboard(result)
+        print "The password is in your clipboard."
+    else:
+        while True:
+            try:
+                w = raw_input("Website name: ")
+            except KeyboardInterrupt:
+                return
+            if w == "":
+                return
+            result = hash(p, w)
+            send_to_clipboard(result)
+            print "The password is in your clipboard."
 
 if __name__ == "__main__":
     cli()
