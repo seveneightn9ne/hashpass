@@ -18,7 +18,7 @@ def get_hashed_master():
 def save_master(master_plaintext):
     """ Saves the SHA512 of master_plaintext to MASTER_PW_PATH. """
     os.makedirs(MASTER_PW_DIR)
-    with open(MASTER_PW_PATH, 'w') as f:
+    with os.fdopen(os.open(MASTER_PW_PATH, os.O_WRONLY | os.O_CREAT, 0600), 'w') as f:
         f.write(hashlib.sha512(master_plaintext).hexdigest())
     global session_master
     session_master = master_plaintext
@@ -62,5 +62,3 @@ def _test_to_chars():
         print "Failed test 2"
     if not _to_chars([4,32,196]) == "bcde":
         print "Failed test 3"
-
-
