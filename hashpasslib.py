@@ -65,12 +65,14 @@ def is_good_pass(password):
     """ If the password is 20 characters and inculdes a symbol, it is good. """
     return reduce(lambda a,b: a or b, [s in password for s in SYMBOLS])
 
-def make_password(password, website):
+def make_password(website):
     """
     Turns the password + website into a 20 character password.
     The password is_good_pass and is deterministic.
     """
-    passwords = _chunks(hash(website+password), size=20)
+    if not session_master:
+        raise Exception("Cannot make password without a master pw")
+    passwords = _chunks(hash(website+session_master), size=20)
     while True:
         for password in passwords:
             if is_good_pass(password):

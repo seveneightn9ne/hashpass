@@ -27,7 +27,7 @@ def cli():
     p = get_password()
     if len(sys.argv) >= 2:
         w = sys.argv[1]
-        result = make_password(p, w)
+        result = make_password(w)
         send_to_clipboard(result)
         print "The password is in your clipboard."
     else:
@@ -38,7 +38,7 @@ def cli():
                 return
             if w == "":
                 return
-            result = hash(p, w)
+            result = make_password(w)
             send_to_clipboard(result)
             print "The password is in your clipboard."
 
