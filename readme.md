@@ -1,5 +1,5 @@
 # Password Manifesto
-passgen is a utility that implements a secure scheme for generating passwords.
+hashpass is a utility that implements a secure scheme for generating passwords.
 
 This is my attempt at implementing the *optimal* password scheme.
 
@@ -65,7 +65,7 @@ Here, I use *password scheme* to mean the way you choose your passwords.
   You probably want one that doesn't have internet access and allows erasing the inputs.
   Even better, find an open source one or write your own, to be sure they aren't nefarious :)
 
-## So what does passgen do?
+## So what does hashpass do?
 * It makes sure your secret key isn't stored anywhere. You type it into a
   password input so it never appears on the screen.
 * It saves the sha512 hash of your secret key on your computer to check for
@@ -75,7 +75,7 @@ Here, I use *password scheme* to mean the way you choose your passwords.
   wipe the clipboard after a few seconds.
 * Usage: 
 
-  ```$ ./passgen.py website.com``` 
+  ```$ ./hasspass.py website.com``` 
 
   It will prompt for a master password
   (twice if you haven't saved one on this computer before).

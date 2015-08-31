@@ -2,7 +2,7 @@
 import os.path, hashlib, getpass, sys, pyperclip
 from subprocess import Popen, PIPE
 
-MASTER_PW_DIR = os.path.expanduser("~/.config/pwgen/")
+MASTER_PW_DIR = os.path.expanduser("~/.config/hashpass/")
 MASTER_PW_FILE = "password.sha512"
 MASTER_PW_PATH = MASTER_PW_DIR + MASTER_PW_FILE
 def init():
