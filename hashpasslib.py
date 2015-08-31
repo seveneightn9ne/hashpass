@@ -35,7 +35,7 @@ def is_correct_master(password):
 
 def _to_chars(nums):
     """ Three 8-bit numbers map to a string of 4 password-safe characters """
-    charset = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ1234567890#*"
+    charset = "abcdefghjkmnopqrstuvwxyzABCDEFGHJKLMNPQRSTUVWXY3456789#*@()+={}?"
     nums4 = ((nums[0] & 0xFC) >> 2,
             ((nums[0] & 0x3) << 4) | ((nums[1] & 0xF0) >> 4),
             ((nums[1] & 0x0F) << 2) | ((nums[2] & 0xC0) >>  6),
@@ -58,7 +58,7 @@ def hash(password, website):
 def _test_to_chars():
     if not _to_chars([0, 0, 0]) == "aaaa":
         print "Failed test 1"
-    if not _to_chars([255, 255, 255]) == "****":
+    if not _to_chars([255, 255, 255]) == "????":
         print "Failed test 2"
     if not _to_chars([4,32,196]) == "bcde":
         print "Failed test 3"
