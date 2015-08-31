@@ -1,0 +1,3 @@
+# hashpass-gui.py bugs
+[ ] Text doesn't show when inputting website.
+[ ] Quit with ctrl-q, ctrl-c, ctrl-d
