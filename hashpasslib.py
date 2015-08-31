@@ -20,10 +20,12 @@ def save_master(master_plaintext):
     os.makedirs(MASTER_PW_DIR)
     with open(MASTER_PW_PATH, 'w') as f:
         f.write(hashlib.sha512(master_plaintext).hexdigest())
+    global session_master
     session_master = master_plaintext
 
 def is_correct_master(password):
     """ Returns True if the password matches the stored master, else False. """
+    global session_master
     if session_master:
         return session_master == password
     if get_hashed_master() == hashlib.sha512(password).hexdigest():
