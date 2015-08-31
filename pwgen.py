@@ -1,5 +1,5 @@
 #!/usr/bin/env python
-import os.path, hashlib, getpass, sys
+import os.path, hashlib, getpass, sys, pyperclip
 from subprocess import Popen, PIPE
 
 MASTER_PW_DIR = os.path.expanduser("~/.config/pwgen/")
@@ -25,8 +25,7 @@ def get_password():
     return pw
 
 def send_to_clipboard(text):
-    p = Popen('xclip -selection clipboard', stdin=PIPE)
-    p.communicate(input=text)
+    pyperclip.copy(text)
 
 if __name__ == "__main__":
     init()
