@@ -24,9 +24,13 @@ Here, I use *password scheme* to mean the way you choose your passwords.
 * *Follows Kerckhoff's principle.* That is, the system should be secure even if
   everything about the system, except the key, is public knowledge.
 * *Available anywhere.* I don't want to have to install LastPass before I can
-  even log in to my Google account on a new computer. Every linux machine should
-  have the capability of telling me any of my passwords given the secret key
-  I keep in my head.
+  even log in to my Google account on a new computer. Given a new device, I should
+  have my passwords with minimal setup, using only the information I keep in my head.
+
+  Orignally I thought that this meant using only available-everywhere schemes, such
+  as a common hashing algorithm. However, usually when you need a password you are also
+  connected to the internet. So I think it's ok to have something available online
+  that you can use (as long as that doesn't compromise security).
 
 ## The scheme
 * You have a secret key, which is a Good Password (long and random). You have
@@ -38,7 +42,7 @@ Here, I use *password scheme* to mean the way you choose your passwords.
   ```
   $ cat /dev/urandom | tr -dc 'a-zA-Z0-9-_!@#$%^&*()_+{}|:<>?=' | fold -w 20 | head -n 1
   ```
-  
+
   I personally would say it's safe to write it down on paper and save it in your
   wallet until you're sure you've memorized it. Some more paranoid than me might
   disagree. You may also want to write it down and put it in a safe place in case
@@ -47,23 +51,9 @@ Here, I use *password scheme* to mean the way you choose your passwords.
   example, for a password for a website, the unique component can be the domain
   name. It doesn't have to be secure, it just has to be unique and obvious (so
   you'll never wonder what you picked).
-* **Your password for a given service will be the sha1 hash of the unique component
-  concatenated with your secret key, with "A!" at the end.** This produces a 42
-  character password, where the first 40 characters are hex digits. The first 40
-  digits alone are as good as a 26-character password using a wide charset. The final
-  "A!" is only there because many websites force a capital and a special character
-  (since they are a publicly revealed portion of the password they do not actually
-  contribute to the security).
-* So to generate your password at any time, you can simply run 
-
-  ```$ head -n 1 | head -c -1 | sha1sum```
-  
-  And then type in `website.comYourSecretKey` to get the hash portion of your password.
-  This method keeps your secret key from being saved in your shell history or in the
-  process list, but it still appears on the screen when you type it.
-* On Android, you can download an app (I use HashStamp) which can similarly SHA1 your text.
-  You probably want one that doesn't have internet access and allows erasing the inputs.
-  Even better, find an open source one or write your own, to be sure they aren't nefarious :)
+* **Your password for a given service will be deterministically generated using only
+  a combination of your secret key and the unique component.** HashPass produces a
+  20 character password that contains a letter, a number, and a symbol.
 
 ## So what does hashpass do?
 * It makes sure your secret key isn't stored anywhere. You type it into a
@@ -73,13 +63,15 @@ Here, I use *password scheme* to mean the way you choose your passwords.
   correctly, and then you'd have a password you could never reproduce.
 * It sends the password directly to your clipboard. In a future version it might
   wipe the clipboard after a few seconds.
-* Usage: 
+* Usage:
 
-  ```$ ./hasspass.py website.com``` 
+  ```$ ./hasspass.py website.com```
 
   It will prompt for a master password
   (twice if you haven't saved one on this computer before).
-  
+* **Soon**, there will be a web app that does the same thing, so you can get
+  your passwords without having downloaded the program (and on your phone).
+
 ## Notes
 * Chrome might store your passwords in plaintext (at least, you can look at them at any time).
   You may consider not letting chrome save your passwords.
