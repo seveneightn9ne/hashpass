@@ -62,7 +62,7 @@ def hash(string):
             map(_to_chars, _chunks(map(ord, hashlib.sha256(string).digest()))))
 
 def is_good_pass(password):
-    """ If the password is 20 characters and inculdes a symbol, it is good. """
+    """ If the password contains a letter, numberd, and symbol, it is good. """
     r_or = lambda a,b: a or b
     r_and = lambda a,b: a and b
     return reduce(r_and, [
