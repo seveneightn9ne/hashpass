@@ -77,40 +77,12 @@ def make_password(website):
     """
     if not session_master:
         raise Exception("Cannot make password without a master pw")
-    passwords = _chunks(hash(website+session_master), size=20)
+    return make_password_inner(session_master, website)
+
+def make_password_inner(master_plain, website):
+    passwords = _chunks(hash(website + master_plain), size=20)
     while True:
         for password in passwords:
             if is_good_pass(password):
                 return password
         passwords = _chunks(hash("".join(passwords)), size=20)
-
-
-def _test_to_chars():
-    if not _to_chars([0, 0, 0]) == "aaaa":
-        print "Failed test 1"
-    if not _to_chars([255, 255, 255]) == "????":
-        print "Failed test 2"
-    if not _to_chars([4,32,196]) == "bcde":
-        print "Failed test 3"
-
-def _test_is_good_pass():
-    if not is_good_pass("a4#"):
-        print "Failed test 4"
-    if is_good_pass(""):
-        print "Failed test 5"
-    if not is_good_pass("oooo6o#oo"):
-        print "Failed test 6"
-    if is_good_pass("oeuoeuOOO2343"):
-        print "Failed test 7"
-
-def _test_make_password():
-    global session_master
-    session_master = "a"
-    if not make_password("b") == "P4{tRc6X3q}5)bCw}su=":
-        print "Failed test 8"
-
-def run_tests():
-    """ Run all tests and print if there is a failure """
-    _test_to_chars()
-    _test_is_good_pass()
-    _test_make_password()
