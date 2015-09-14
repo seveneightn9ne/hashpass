@@ -1,0 +1,29 @@
+<!doctype html5>
+<html>
+<head>
+    <title>HashPass</title>
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/2.1.4/jquery.min.js"></script>
+    <script src="forge.min.js"></script>
+    <script src="hashpasslib.js"></script>
+    <script src="main.js"></script>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <h1>HashPass</h1>
+    <div id="container">
+        <label for="master">Master Password</label>
+        <input type="password" id="master" tabindex="1">
+        <input type="button" id="save" value="save"><br>
+
+        <label for="website">Website</label>
+        <input type="url" id="website" tabindex="2"><br>
+
+        <label for="password">HashPassword</label>
+        <input id="password" type="text" disabled><br>
+
+        <a id="clear" href="#">clear saved master</a><br><br>
+    </div>
+    <a href="http://github.com/seveneightn9ne/hashpass" id="github">hashpass on github</a>
+</body>
+</html>
+

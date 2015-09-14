@@ -1,13 +1,13 @@
-var forge = require('node-forge');
 
-var LETTERS = "abcdefghjkmnopqrstuvwxyzABCDEFGHJKLMNPQRSTUVWXY"
-var NUMBERS = "3456789"
-var SYMBOLS = "#*@()+={}?"
+function HashPass() {
+  var LETTERS = "abcdefghjkmnopqrstuvwxyzABCDEFGHJKLMNPQRSTUVWXY";
+  var NUMBERS = "3456789";
+  var SYMBOLS = "#*@()+={}?";
 
-function _to_chars(nums) {
+  var _to_chars = function(nums) {
     // Three 8-bit numbers map to a string of 4 password-safe characters.
     var charset = LETTERS + NUMBERS + SYMBOLS;
-    if (charset.length !== 64) {
+    if (charset.length != 64) {
         throw new Error("Bad charset wrong length");
     }
     var nums4 = [( nums[0] & 0xFC) >> 2,
@@ -18,11 +18,10 @@ function _to_chars(nums) {
         return charset[num]
     }).reduce(function (a, b) {
         return a + b
-    })
-}
-exports._to_chars = _to_chars;
+    });
+  };
 
-function is_good_pass(password) {
+  var is_good_pass = function(password) {
     // If the password contains a letter, numberd, and symbol, it is good.
     function contains_some(sample, approved) {
         // Whether sample string contains any characters from approved string.
@@ -35,10 +34,9 @@ function is_good_pass(password) {
     return (contains_some(password, LETTERS) &&
             contains_some(password, NUMBERS) &&
             contains_some(password, SYMBOLS))
-}
-exports.is_good_pass = is_good_pass;
+  };
 
-function _chunks(lst, size) {
+  var _chunks = function(lst, size) {
     if (size === undefined) {
         size = 3
     }
@@ -47,9 +45,9 @@ function _chunks(lst, size) {
         r.push(lst.slice(size*i, size*(i+1)))
     }
     return r
-}
+  };
 
-function hash(string) {
+  var hash = function(string) {
     // SHA256 hash the string and convert to the 64 character charset.
     function ord(chr) {
         return chr[0].charCodeAt(0);
@@ -61,10 +59,9 @@ function hash(string) {
     return _chunks(nums).map(_to_chars).reduce(function (a, b) {
         return a + b
     });
-}
-exports.hash = hash
+  };
 
-exports.make_password_inner = function make_password_inner(master_plain, website) {
+  this.make_password = function(master_plain, website) {
     var passwords = _chunks(
         hash(website + master_plain), 20)
     while (true) {
@@ -77,4 +74,5 @@ exports.make_password_inner = function make_password_inner(master_plain, website
                 hash("".join(passwords)), 20)
         }
     }
+  };
 }
