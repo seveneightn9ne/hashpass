@@ -31,6 +31,14 @@ function check_master(entered_master) {
 }
 
 $(document).ready(function() {
+    // Security warning.
+    if (location.protocol === 'https:') {
+        $(".insecure-warning").hide();
+    } else {
+        console.warn("Insecure connection, please use https.");
+        $("#main-title").addClass("strike");
+    }
+
     var hp = new HashPass();
     if (has_saved_master()) {
         $("#save").hide();
