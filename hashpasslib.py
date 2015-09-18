@@ -79,8 +79,22 @@ def make_password(website):
         raise Exception("Cannot make password without a master pw")
     return make_password_inner(session_master, website)
 
-def make_password_inner(master_plain, website):
-    passwords = _chunks(hash(website + master_plain), size=20)
+def make_password_inner(master, website):
+    """
+    Generate a site password from the master and site name.
+
+    1. Concatenate master onto website.
+    2. Hash (SHA256)
+    3. Convert to more usefull character set.
+    4. Re-roll if password is entropic enough.
+
+    Args:
+        master: The plaintext master password.
+        website: The site name.
+
+    Returns: The password for that site.
+    """
+    passwords = _chunks(hash(website + master), size=20)
     while True:
         for password in passwords:
             if is_good_pass(password):
