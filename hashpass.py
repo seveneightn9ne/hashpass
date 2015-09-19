@@ -62,7 +62,8 @@ def cli(arguments):
         while True:
             try:
                 w = raw_input("Website name: ")
-            except KeyboardInterrupt:
+            except (KeyboardInterrupt, EOFError):
+                print ""
                 return
             if w == "":
                 return
