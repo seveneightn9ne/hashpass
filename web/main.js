@@ -40,6 +40,18 @@ $(document).ready(function() {
     }
 
     var hp = new HashPass();
+
+    function recalculate_result() {
+        var master_val = $("#master").val();
+        var website_val = $("#website").val();
+        if (master_val === "" || website_val === "") {
+            $("#password").val("");
+        } else {
+            var pass = hp.make_password(master_val, website_val);
+            $("#password").val(pass);
+        }
+    }
+
     if (has_saved_master()) {
         $("#save").hide();
     } else {
@@ -61,22 +73,14 @@ $(document).ready(function() {
                 }
             }
         }
+        recalculate_result();
     });
 
-    function onsave() {
+    $("#save").click(function() {
         save_master($("#master").val());
         $("#save").fadeOut();
         $("#clear").show();
         $("#master").addClass("correct");
-    }
-
-    $("#save").click(function() {
-        onsave();
-    });
-
-    $("#website").on('input', function() {
-        var pass = hp.make_password($("#master").val(), $(this).val());
-        $("#password").val(pass);
     });
 
     $("#clear").click(function() {
@@ -84,18 +88,25 @@ $(document).ready(function() {
         $(this).fadeOut();
         $("#save").show();
         $("#master").val("");
+        recalculate_result();
         return false;
+    });
+
+    $("#website").on('input', function() {
+        recalculate_result();
     });
 
     $("#master").keyup(function(e){
         if(e.keyCode == 13) {
             onsave();
+            recalculate_result();
             $("#website").focus();
         }
     });
 
     $("#website").keyup(function(e){
         if(e.keyCode == 13) {
+            recalculate_result();
             $("#password").attr("disabled",false);
             $("#password").select();
         }
