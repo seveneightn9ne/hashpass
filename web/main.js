@@ -76,18 +76,21 @@ $(document).ready(function() {
         recalculate_result();
     });
 
-    $("#save").click(function() {
+    function onsave() {
         save_master($("#master").val());
         $("#save").fadeOut();
         $("#clear").show();
         $("#master").addClass("correct");
-    });
+    };
+
+    $("#save").click(onsave);
 
     $("#clear").click(function() {
         clear_saved_master();
         $(this).fadeOut();
         $("#save").show();
         $("#master").val("");
+        $("#master").removeClass("correct incorrect");
         recalculate_result();
         return false;
     });
