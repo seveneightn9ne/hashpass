@@ -6,28 +6,37 @@ function supports_html5_storage() {
     }
 }
 
-var LOCAL_MASTER_KEY = "hashed_master";
+var LOCAL_MASTER_HASH_KEY = "master_hash";
+var LOCAL_MASTER_SALT_KEY = "master_salt";
 
 function save_master(master) {
-    var hashed_master = forge.md.sha512.create().update(master).digest().toHex();
-    localStorage.setItem(LOCAL_MASTER_KEY, hashed_master);
+    var salt = forge.random.getBytesSync(128);
+    var hashed_master = forge.md.sha512.create().update(master + salt).digest().toHex();
+    localStorage.setItem(LOCAL_MASTER_HASH_KEY, hashed_master);
+    localStorage.setItem(LOCAL_MASTER_SALT_KEY, salt);
 }
 
 function saved_master() {
-    return localStorage.getItem(LOCAL_MASTER_KEY);
+    return {
+        hash: localStorage.getItem(LOCAL_MASTER_HASH_KEY),
+        salt: localStorage.getItem(LOCAL_MASTER_SALT_KEY)
+    };
 }
 
 function has_saved_master() {
-    return saved_master() != null;
+    var pass_struct = saved_master()
+    return pass_struct.hash != null && pass_struct.salt != null;
 }
 
 function clear_saved_master() {
-    localStorage.removeItem(LOCAL_MASTER_KEY);
+    localStorage.removeItem(LOCAL_MASTER_HASH_KEY);
+    localStorage.removeItem(LOCAL_MASTER_SALT_KEY);
 }
 
 function check_master(entered_master) {
-    var hashed_master = forge.md.sha512.create().update(entered_master).digest().toHex();
-    return hashed_master === saved_master();
+    var pass_struct = saved_master();
+    var hashed_master = forge.md.sha512.create().update(entered_master + pass_struct.salt).digest().toHex();
+    return hashed_master === pass_struct.hash;
 }
 
 $(document).ready(function() {
