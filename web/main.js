@@ -1,10 +1,11 @@
 function supports_html5_storage() {
-  try {
-    return 'localStorage' in window && window['localStorage'] !== null;
-  } catch (e) {
-    return false;
-  }
+    try {
+        return 'localStorage' in window && window['localStorage'] !== null;
+    } catch (e) {
+        return false;
+    }
 }
+
 var LOCAL_MASTER_KEY = "hashed_master";
 
 function save_master(master) {
