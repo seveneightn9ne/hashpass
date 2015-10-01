@@ -32,7 +32,7 @@ function check_master(entered_master) {
 
 $(document).ready(function() {
     // Security warning.
-    if (location.protocol === 'https:') {
+    if (location.protocol === 'https:' || location.protocol === "file:") {
         $(".insecure-warning").hide();
     } else {
         console.warn("Insecure connection, please use https.");
