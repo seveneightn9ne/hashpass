@@ -9,13 +9,8 @@ function supports_html5_storage() {
 var LOCAL_MASTER_KEY = "hashed_master";
 
 function save_master(master) {
-    console.log(master);
     var hashed_master = forge.md.sha512.create().update(master).digest().toHex();
     localStorage.setItem(LOCAL_MASTER_KEY, hashed_master);
-}
-
-function clear_saved_master() {
-    localStorage.removeItem(LOCAL_MASTER_KEY);
 }
 
 function saved_master() {
@@ -26,9 +21,13 @@ function has_saved_master() {
     return saved_master() != null;
 }
 
+function clear_saved_master() {
+    localStorage.removeItem(LOCAL_MASTER_KEY);
+}
+
 function check_master(entered_master) {
     var hashed_master = forge.md.sha512.create().update(entered_master).digest().toHex();
-    return hashed_master == saved_master();
+    return hashed_master === saved_master();
 }
 
 $(document).ready(function() {
