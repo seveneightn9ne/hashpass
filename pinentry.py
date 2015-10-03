@@ -5,11 +5,11 @@ class PinEntryException(Exception):
 
 def get_pin(description="", prompt="", errormsg=""):
     """Run pinentry to get a password from the user.
-    
+
     Return value:
         User password as a string. Could be empty.
         None if the user pressed cancel.
-    
+
     Raises:
         PinEntryException if something went wrong communicating with pinentry.
     """
@@ -40,7 +40,7 @@ def get_pin(description="", prompt="", errormsg=""):
     yline = output_lines[-3]
     if xline[:2] == "D ":
         # User entered valid input.
-        return xline[2:]
+        return xline[2:].replace("%25", "%")
     elif yline[:3] == "ERR":
         # User cancelled.
         return None
