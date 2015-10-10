@@ -43,7 +43,7 @@ def _chunks(lst, size):
     for i in xrange(0, len(lst), size):
         yield lst[i:i+size]
 
-def _bytes_to_pw_chars(bytes):
+def _bytes_to_pw_chars(bytez):
     """Convert 3 bytes into 4 password characters.
 
     A password character is one in the set of:
@@ -52,14 +52,14 @@ def _bytes_to_pw_chars(bytes):
     - symbols
 
     Args:
-        bytes: A list of 3 bytes.
+        bytez: A list of 3 bytes.
     Returns:
         A string of 4 characters.
     """
 
-    assert len(bytes) == 3
+    assert len(bytez) == 3
     # Make sure they're all bytes.
-    assert all([x == x & 0xFF for x in bytes])
+    assert all([x == x & 0xFF for x in bytez])
 
     charset = LETTERS + NUMBERS + SYMBOLS
     assert len(charset) == 64
@@ -67,13 +67,13 @@ def _bytes_to_pw_chars(bytes):
     # Use 6-bit segments of the 24 bits from the 3 bytes
     # to select 4 characters from the size 64 charset.
             # Six high bytes from byte0
-    nums4 = [(bytes[0] & 0xFC) >> 2,
+    nums4 = [(bytez[0] & 0xFC) >> 2,
             # 2 low bits of byte0, 4 high bits of byte1
-            ((bytes[0] & 0x03) << 4) | ((bytes[1] & 0xF0) >> 4),
+            ((bytez[0] & 0x03) << 4) | ((bytez[1] & 0xF0) >> 4),
             # 4 low bits of byte1, 2 high bits of byte2
-            ((bytes[1] & 0x0F) << 2) | ((bytes[2] & 0xC0) >>  6),
+            ((bytez[1] & 0x0F) << 2) | ((bytez[2] & 0xC0) >>  6),
             # 6 low bits of byte2
-            bytes[2] & 0x3F]
+            bytez[2] & 0x3F]
     chars4 = [charset[i] for i in nums4]
     return "".join(chars4)
 
