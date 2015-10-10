@@ -1,8 +1,16 @@
 #!/usr/bin/env python
+"""
+Usage: hashpass [options] [<website>]
+
+Options:
+    -s --show   Display the password instead of putting it in the clipboard
+
+"""
 from hashpasslib import *
 import pinentry
 
 import os.path, hashlib, getpass, sys, pyperclip
+from docopt import docopt
 from subprocess import Popen, PIPE
 
 def init():
@@ -37,12 +45,12 @@ def get_password():
 def send_to_clipboard(text):
     pyperclip.copy(text)
 
-def cli():
+def cli(arguments):
     """ runs the app with the CLI as the user interface """
     init()
     get_password()
-    if len(sys.argv) >= 2:
-        w = sys.argv[1]
+    if arguments['<website>']:
+        w = arguments['<website>']
         result = make_password(w)
         send_to_clipboard(result)
         print "The password is in your clipboard."
@@ -59,5 +67,5 @@ def cli():
             print "The password is in your clipboard."
 
 if __name__ == "__main__":
-    cli()
+    cli(docopt(__doc__, version='HashPass 1.0'))
 
