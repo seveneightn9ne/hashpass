@@ -37,38 +37,77 @@ def is_correct_master(password):
         return True
     return False
 
-def _to_chars(nums):
-    """ Three 8-bit numbers map to a string of 4 password-safe characters """
+def _chunks(lst, size):
+    """Divide a list into chunks of a certain size."""
+    assert len(lst) % size == 0
+    for i in xrange(0, len(lst), size):
+        yield lst[i:i+size]
+
+def _bytes_to_pw_chars(bytes):
+    """Convert 3 bytes into 4 password characters.
+
+    A password character is one in the set of:
+    - letters
+    - numbers
+    - symbols
+
+    Args:
+        bytes: A list of 3 bytes.
+    Returns:
+        A string of 4 characters.
+    """
+
+    assert len(bytes) == 3
+    # Make sure they're all bytes.
+    assert all([x == x & 0xFF for x in bytes])
+
     charset = LETTERS + NUMBERS + SYMBOLS
-    if not len(charset) == 64:
-        raise Exception("Bad charset wrong length")
-    nums4 = ((nums[0] & 0xFC) >> 2,
-            ((nums[0] & 0x3) << 4) | ((nums[1] & 0xF0) >> 4),
-            ((nums[1] & 0x0F) << 2) | ((nums[2] & 0xC0) >>  6),
-             nums[2] & 0x3F)
-    #print map(lambda n: "{0:b}".format(n), nums)
-    #print map(lambda n: "{0:b}".format(n), nums4)
-    return reduce(lambda a,b: a+b, map(lambda i: charset[i], nums4))
+    assert len(charset) == 64
 
-def _chunks(lst, size=3):
-    r = []
-    for i in range(len(lst)/size):
-        r.append(lst[size*i:size*i + size])
-    return r
+    # Use 6-bit segments of the 24 bits from the 3 bytes
+    # to select 4 characters from the size 64 charset.
+            # Six high bytes from byte0
+    nums4 = [(bytes[0] & 0xFC) >> 2,
+            # 2 low bits of byte0, 4 high bits of byte1
+            ((bytes[0] & 0x03) << 4) | ((bytes[1] & 0xF0) >> 4),
+            # 4 low bits of byte1, 2 high bits of byte2
+            ((bytes[1] & 0x0F) << 2) | ((bytes[2] & 0xC0) >>  6),
+            # 6 low bits of byte2
+            bytes[2] & 0x3F]
+    chars4 = [charset[i] for i in nums4]
+    return "".join(chars4)
 
-def hash(string):
-    """ SHA256 hash the string and convert to the 64 character charset. """
-    return reduce(lambda a,b: a+b,
-            map(_to_chars, _chunks(map(ord, hashlib.sha256(string).digest()))))
+def _bytes_to_password_candidate(bytez):
+    """Convert 15 bytes into a password candidate.
+
+    Args:
+        bytez: A list of 15 byte values.
+
+    Returns:
+        A string of 20 characters.
+    """
+    assert len(bytez) == 15
+    byte_tuples = list(_chunks(bytez, 3))
+    assert len(byte_tuples) == 5
+    char_tuples = map(_bytes_to_pw_chars, byte_tuples)
+    assert len(byte_tuples) == 5
+    converted = "".join(char_tuples)
+    assert len(converted) == 20
+    return converted
 
 def is_good_pass(password):
-    """ If the password contains a letter, numberd, and symbol, it is good. """
-    r_or = lambda a,b: a or b
-    r_and = lambda a,b: a and b
-    return reduce(r_and, [
-        reduce(r_or, [c in password for c in set])
-        for set in (LETTERS, NUMBERS, SYMBOLS)])
+    """Validate a password candidate.
 
+    Must satisfy these rules:
+    - exactly 20 characters
+    - contains a letter
+    - contains a number
+    - contains a symbol
+    """
+    if len(password) != 20:
+        return False
+    return all([any([c in password for c in charset])
+                for charset in (LETTERS, NUMBERS, SYMBOLS)])
 
 def make_password(website):
     """
@@ -80,13 +119,12 @@ def make_password(website):
     return make_password_inner(session_master, website)
 
 def make_password_inner(master, website):
-    """
-    Generate a site password from the master and site name.
+    """Generate a site password from the master and site name.
 
     1. Concatenate master onto website.
-    2. Hash (SHA256)
-    3. Convert to more usefull character set.
-    4. Re-roll if password is entropic enough.
+    2. Hash (SHA256) to produce two candidates.
+    3. Convert to output character set.
+    4. Re-roll if candidates do not satisfy constraints.
 
     Args:
         master: The plaintext master password.
@@ -94,9 +132,26 @@ def make_password_inner(master, website):
 
     Returns: The password for that site.
     """
-    passwords = _chunks(hash(website + master), size=20)
-    while True:
-        for password in passwords:
-            if is_good_pass(password):
-                return password
-        passwords = _chunks(hash("".join(passwords)), size=20)
+    limit = 10000
+    reroll_count = 0
+    combined = "{}{}".format(website, master)
+    hashed_string = hashlib.sha256(combined).digest()
+    for _ in xrange(limit):
+        hashed_bytes = map(ord, hashed_string)
+        assert len(hashed_bytes) == 32
+        candidates = map(_bytes_to_password_candidate,
+                         [hashed_bytes[:15], hashed_bytes[15:30]])
+        if is_good_pass(candidates[0]):
+            return candidates[0]
+        elif is_good_pass(candidates[1]):
+            reroll_count += 1
+            return candidates[1]
+        else:
+            reroll_count += 2
+            # Repeatedly hash to re-roll.
+            # This rehash throws out the last 2 bytes each round.
+            hashed_string = hashlib.sha256("".join(candidates)).digest()
+
+    print "Could not find password after {} tries.".format(limit)
+    print "This is improbable or something is wrong."
+    raise Exception("Password reroll limit reached")
