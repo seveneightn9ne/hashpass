@@ -47,13 +47,17 @@ def send_to_clipboard(text):
 
 def cli(arguments):
     """ runs the app with the CLI as the user interface """
+    print arguments
     init()
     get_password()
     if arguments['<website>']:
         w = arguments['<website>']
         result = make_password(w)
-        send_to_clipboard(result)
-        print "The password is in your clipboard."
+        if arguments['--show']:
+            print result
+        else:
+            send_to_clipboard(result)
+            print "The password is in your clipboard."
     else:
         while True:
             try:
@@ -63,8 +67,11 @@ def cli(arguments):
             if w == "":
                 return
             result = make_password(w)
-            send_to_clipboard(result)
-            print "The password is in your clipboard."
+            if arguments['--show']:
+                print result
+            else:
+                send_to_clipboard(result)
+                print "The password is in your clipboard."
 
 if __name__ == "__main__":
     cli(docopt(__doc__, version='HashPass 1.0'))
