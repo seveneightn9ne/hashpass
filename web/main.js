@@ -39,6 +39,20 @@ function check_master(entered_master) {
     return hashed_master === pass_struct.hash;
 }
 
+function make_timer(ms, callback) {
+    var id = null;
+
+    return {
+        bump: function() {
+            clearTimeout(id);
+            setTimeout(function() {
+                id = null;
+                callback();
+            }, ms);
+        }
+    }
+}
+
 $(document).ready(function() {
     // Security warning.
     if (location.protocol === 'https:' || location.protocol === "file:") {
@@ -49,6 +63,17 @@ $(document).ready(function() {
     }
 
     var hp = new HashPass();
+
+    // Clear the password fields after 1 minute of inactivity.
+    var clearing_timer = make_timer(60*1000, function() {
+        console.log("Clearing password fields after timeout.");
+        $("#master").val("");
+        $("#website").val("");
+        recalculate_result();
+    });
+
+    // The timer needs to be bumped on any reasonable interaction.
+    clearing_timer.bump();
 
     function recalculate_result() {
         var master_val = $("#master").val();
@@ -69,6 +94,7 @@ $(document).ready(function() {
     $("#master").focus();
 
     $("#master").on('input', function() {
+        clearing_timer.bump();
         if (has_saved_master()) {
             if (check_master($(this).val())) {
                 $(this).addClass("correct");
@@ -86,6 +112,7 @@ $(document).ready(function() {
     });
 
     function onsave() {
+        clearing_timer.bump();
         save_master($("#master").val());
         $("#save").fadeOut();
         $("#clear").show();
@@ -95,6 +122,7 @@ $(document).ready(function() {
     $("#save").click(onsave);
 
     $("#clear").click(function() {
+        clearing_timer.bump();
         clear_saved_master();
         $(this).fadeOut();
         $("#save").show();
@@ -105,11 +133,13 @@ $(document).ready(function() {
     });
 
     $("#website").on('input', function() {
+        clearing_timer.bump();
         recalculate_result();
     });
 
     $("#master").keyup(function(e){
         if(e.keyCode == 13) {
+            clearing_timer.bump();
             onsave();
             recalculate_result();
             $("#website").focus();
@@ -118,6 +148,7 @@ $(document).ready(function() {
 
     $("#website").keyup(function(e){
         if(e.keyCode == 13) {
+            clearing_timer.bump();
             recalculate_result();
             $("#password").attr("disabled",false);
             $("#password").select();
