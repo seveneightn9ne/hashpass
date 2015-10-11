@@ -47,7 +47,6 @@ def send_to_clipboard(text):
 
 def cli(arguments):
     """ runs the app with the CLI as the user interface """
-    print arguments
     init()
     get_password()
     if arguments['<website>']:
