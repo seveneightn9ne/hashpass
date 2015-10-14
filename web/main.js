@@ -150,13 +150,12 @@ $(document).ready(function() {
         if(e.keyCode == 13) {
             clearing_timer.bump();
             recalculate_result();
-            $("#password").attr("disabled",false);
             $("#password").select();
         }
     });
 
-    $("#password").blur(function() {
-        $(this).attr("disabled", true);
+    $("#password").focus(function() {
+    	$(this).select();
     });
 
 });
