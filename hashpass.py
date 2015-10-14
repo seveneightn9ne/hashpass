@@ -28,7 +28,7 @@ def get_password_cli():
     # when is_correct_master(pw) it will be saved
 
 def get_password():
-    """ Gets the password via pinentry if possible fallback to CLI. """
+    """ Gets the password via pinentry if possible. Fallback to CLI. """
     try:
         pw = pinentry.get_pin(description="Enter hashpass master password:",
                               prompt="Password:")

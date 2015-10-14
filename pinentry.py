@@ -14,9 +14,11 @@ def get_pin(description="", prompt="", errormsg=""):
         PinEntryException if something went wrong communicating with pinentry.
     """
     try:
+        # Run pinentry, ignoring stderr.
         pinentry = subprocess.Popen(["pinentry"],
                                     stdin=subprocess.PIPE,
-                                    stdout=subprocess.PIPE)
+                                    stdout=subprocess.PIPE,
+                                    stderr=subprocess.PIPE)
     except OSError:
         # Could not launch pinentry.
         raise PinEntryException("Could not launch pinentry")
