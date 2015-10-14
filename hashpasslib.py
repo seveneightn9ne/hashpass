@@ -1,5 +1,5 @@
 #!/usr/bin/env python
-import os.path, hashlib, getpass, sys, pyperclip
+import os.path, hashlib, getpass, sys
 from subprocess import Popen, PIPE
 
 MASTER_PW_DIR = os.path.expanduser("~/.config/hashpass/")

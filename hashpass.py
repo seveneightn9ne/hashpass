@@ -9,7 +9,7 @@ Options:
 from hashpasslib import *
 import pinentry
 
-import os.path, hashlib, getpass, sys, pyperclip
+import os.path, hashlib, getpass, sys
 from docopt import docopt
 from subprocess import Popen, PIPE
 
@@ -43,6 +43,7 @@ def get_password():
         return get_password_cli()
 
 def send_to_clipboard(text):
+    import pyperclip
     pyperclip.copy(text)
 
 def cli(arguments):
