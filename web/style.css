@@ -23,8 +23,9 @@ body {
 #master.incorrect {
     border-color: red;
 }
-input:focus {
+input:focus, input:invalid {
     outline: none;
+    box-shadow: none;
 }
 a {
     color: #428bca;
