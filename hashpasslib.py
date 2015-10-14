@@ -1,6 +1,5 @@
 #!/usr/bin/env python
-import os.path, hashlib, getpass, sys
-from subprocess import Popen, PIPE
+import os.path, hashlib
 
 MASTER_PW_DIR = os.path.expanduser("~/.config/hashpass/")
 MASTER_PW_FILE = "password.sha512"
