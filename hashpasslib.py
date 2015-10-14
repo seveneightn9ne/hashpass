@@ -108,16 +108,18 @@ def is_good_pass(password):
     return all([any([c in password for c in charset])
                 for charset in (LETTERS, NUMBERS, SYMBOLS)])
 
-def make_password(website):
+def make_password(website, use_bcrypt=False):
     """
     Turns the password + website into a 20 character password.
     The password is_good_pass and is deterministic.
     """
     if not session_master:
         raise Exception("Cannot make password without a master pw")
-    return make_password_inner(session_master, website)
+    if use_bcrypt:
+        raise Exception("Bcrypt is not yet supported.")
+    return make_password_inner(session_master, website, use_bcrypt)
 
-def make_password_inner(master, website):
+def make_password_inner(master, website, use_bcrypt):
     """Generate a site password from the master and site name.
 
     1. Concatenate master onto website.

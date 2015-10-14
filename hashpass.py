@@ -3,7 +3,9 @@
 Usage: hashpass [options] [<website>]
 
 Options:
-    -s --show   Display the password instead of putting it in the clipboard
+    -s --show    Display the password instead of putting it in the clipboard
+    -b --bcrypt  Use bcrypt as the hashing algorithm [Recommended]
+    --sha        Use sha256 as the hashing algorithm [Default]
 
 """
 from hashpasslib import *
@@ -52,7 +54,7 @@ def cli(arguments):
     get_password()
     if arguments['<website>']:
         w = arguments['<website>']
-        result = make_password(w)
+        result = make_password(w, arguments['--bcrypt'])
         if arguments['--show']:
             print result
         else:
@@ -67,7 +69,7 @@ def cli(arguments):
                 return
             if w == "":
                 return
-            result = make_password(w)
+            result = make_password(w, arguments['--bcrypt'])
             if arguments['--show']:
                 print result
             else:
