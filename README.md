@@ -10,9 +10,11 @@ Usage:
 `hashpass [options] [<website>]`
 
 If you provide `<website>`, HashPass will prompt you for your master password and output the
-generated password to your clipboard.
+generated password to your clipboard. If you didn't, it ask continuously for website names until
+you kill it.
 
 Options:
+
 `  -s --show   Display the password instead of putting it in the clipboard`
 
 If this is the first time using HashPass on this computer, it will ask you for your master
@@ -26,6 +28,7 @@ HTTPS it will give a big ugly warning.
 
 ## How does it work / why is this a good idea / etc?
 
-See `manifesto.md` for a full explanation of the algorithm and why it's secure.
+See [`manifesto.md`](https://github.com/seveneightn9ne/hashpass/blob/master/manifesto.md) for
+a full explanation of the algorithm and why it's secure.
 
 
