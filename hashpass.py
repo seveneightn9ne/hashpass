@@ -3,10 +3,9 @@
 Usage: hashpass [options] [<website>]
 
 Options:
-    -s --show    Display the password instead of putting it in the clipboard
-    -b --bcrypt  Use bcrypt as the hashing algorithm [Recommended]
+    -s --show    Display the site password instead of putting it in the clipboard
+    -b --bcrypt  Use bcrypt as the hashing algorithm [Soon to be recommended]
     --sha        Use sha256 as the hashing algorithm [Default]
-
 """
 from hashpasslib import *
 import pinentry
@@ -17,7 +16,7 @@ from subprocess import Popen, PIPE
 
 def init():
     """ Saves the master password to disk if you haven't already """
-    if not get_hashed_master():
+    if not get_stored_master():
         save_master(getpass.getpass("No master password found. Enter one now: "))
         print "Your master password will be hashed and saved at " + MASTER_PW_PATH
 

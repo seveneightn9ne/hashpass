@@ -1,33 +1,33 @@
 import unittest
-import hashpasslib
+import alg
 
 class TestToChars(unittest.TestCase):
     def test_bytes_to_pw_chars(self):
-        self.assertEqual(hashpasslib._bytes_to_pw_chars([0, 0, 0]), "aaaa")
-        self.assertEqual(hashpasslib._bytes_to_pw_chars([255, 255, 255]), "????")
-        self.assertEqual(hashpasslib._bytes_to_pw_chars([4,32,196]), "bcde")
+        self.assertEqual(alg._bytes_to_pw_chars([0, 0, 0]), "aaaa")
+        self.assertEqual(alg._bytes_to_pw_chars([255, 255, 255]), "????")
+        self.assertEqual(alg._bytes_to_pw_chars([4,32,196]), "bcde")
 
     def test_is_good_pass(self):
-        self.assertTrue(hashpasslib.is_good_pass("a4#aaaaaaaaaaaaaaaaa"))
-        self.assertTrue(hashpasslib.is_good_pass("oooo6o#ooaaaaaaaaaaa"))
-        self.assertFalse(hashpasslib.is_good_pass(""))
-        self.assertFalse(hashpasslib.is_good_pass("oeuoeuOOO2343"))
+        self.assertTrue(alg.is_good_pass("a4#aaaaaaaaaaaaaaaaa"))
+        self.assertTrue(alg.is_good_pass("oooo6o#ooaaaaaaaaaaa"))
+        self.assertFalse(alg.is_good_pass(""))
+        self.assertFalse(alg.is_good_pass("oeuoeuOOO2343"))
 
     def test_make_password(self):
         # reroll 0 times
         self.assertEqual("P4{tRc6X3q}5)bCw}su=",
-                hashpasslib.make_password_inner("a", "b"))
+                alg.make_site_password("a", "b"))
         self.assertEqual("4D*y7}fP646v3rdWEMz6",
-                hashpasslib.make_password_inner("batterystapler", "sportsball"))
+                alg.make_site_password("batterystapler", "sportsball"))
 
         # reroll 1 time
         self.assertEqual("C}Kzk*)6(CbR}sM5PxuK",
-                hashpasslib.make_password_inner("a", "sportsball"))
+                alg.make_site_password("a", "sportsball"))
 
     def _test_one(self, rerolls, master, slug, result):
         """Test one password, ignores rerolls parameter."""
         self.assertEqual(result,
-                hashpasslib.make_password_inner(master, slug))
+                alg.make_site_password(master, slug))
 
     def test_make_password_more(self):
         self._test_one(0, "wwsx6kolKO", "Ckf2oCe18I", "jzebYcmJ}+8b5rye{9Dn")
