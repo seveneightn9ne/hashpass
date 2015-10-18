@@ -1,5 +1,6 @@
 #!/usr/bin/env python
 import os.path
+import errno
 import alg
 
 MASTER_PW_DIR = os.path.expanduser("~/.config/hashpass/")
