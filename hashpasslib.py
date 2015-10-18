@@ -27,7 +27,7 @@ def read_stored_master():
 
 def store_master(master_plaintext):
     """Safely stores a derivation of the master to MASTER_PW_PATH for checking against."""
-    os.makedirs(MASTER_PW_DIR)
+    _mkdir_p(MASTER_PW_DIR)
     with os.fdopen(os.open(MASTER_PW_PATH, os.O_WRONLY | os.O_CREAT, 0600), 'w') as f:
         f.write(alg.make_storeable(master_plaintext))
 
@@ -50,3 +50,12 @@ def make_password(slug):
     if not session_intermediate:
         raise Exception("Cannot make password without an intermediate pw.")
     return alg.make_site_password(session_intermediate, slug)
+
+def _mkdir_p(path):
+    try:
+        os.makedirs(path)
+    except OSError as exc:
+        if exc.errno == errno.EEXIST and os.path.isdir(path):
+            pass
+        else:
+            raise

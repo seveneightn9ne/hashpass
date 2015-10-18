@@ -45,8 +45,8 @@ class HashPass(Tkinter.Frame, object):
     self.need_new_master = read_stored_master() == None
     self.need_master = True
 
-    label_clipboard_text = "Enter a master password." + \
-        "Its hash will be saved to disk." if self.need_new_master \
+    label_clipboard_text = "Enter a master password.\n" + \
+        "It will be bcrypted and saved to disk." if self.need_new_master \
         else "Enter your master password."
 
     self.label_clipboard = Tkinter.Label(self,
