@@ -39,7 +39,6 @@ def is_correct_master(password):
     stored_component = read_stored_master()
     if (stored_component is not None
         and alg.check_stored(password, stored_component)):
-        session_master = password
         return True
     return False
 
