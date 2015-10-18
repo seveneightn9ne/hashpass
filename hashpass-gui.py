@@ -42,7 +42,7 @@ class HashPass(Tkinter.Frame, object):
         font=self.font_mono)
     self.label_hash.grid(sticky=Tkinter.W)
 
-    self.need_new_master = get_hashed_master() == None
+    self.need_new_master = read_stored_master() == None
     self.need_master = True
 
     label_clipboard_text = "Enter a master password." + \
@@ -85,6 +85,7 @@ class HashPass(Tkinter.Frame, object):
       self.label_clipboard.config(text=("Enter the password again."))
     elif self.need_master:
       if is_correct_master(master):
+        use_master(master, use_bcrypt=False)
         self.label_clipboard.config(
             text=("Enter the website name to generate a password."))
         # Clear the password.
