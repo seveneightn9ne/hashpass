@@ -80,7 +80,7 @@ class HashPass(Tkinter.Frame, object):
 
   def heres_a_master(self, master):
     if self.need_new_master:
-      save_master(master)
+      store_master(master)
       self.need_new_master = False
       self.label_clipboard.config(text=("Enter the password again."))
     elif self.need_master:
