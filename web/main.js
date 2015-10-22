@@ -1,3 +1,5 @@
+require(["./hashpasslib"], function(hashpasslib) { // Start of module.
+
 function supports_html5_storage() {
     try {
         return 'localStorage' in window && window['localStorage'] !== null;
@@ -62,8 +64,6 @@ $(document).ready(function() {
         $("#main-title").addClass("strike");
     }
 
-    var hp = new HashPass();
-
     // Clear the password fields after 1 minute of inactivity.
     var clearing_timer = make_timer(60*1000, function() {
         console.log("Clearing password fields after timeout.");
@@ -81,7 +81,7 @@ $(document).ready(function() {
         if (master_val === "" || website_val === "") {
             $("#password").val("");
         } else {
-            var pass = hp.make_password(master_val, website_val);
+            var pass = hashpasslib.make_password(master_val, website_val);
             $("#password").val(pass);
         }
     }
@@ -159,3 +159,5 @@ $(document).ready(function() {
     });
 
 });
+
+}); // End of module.

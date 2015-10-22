@@ -1,20 +1,22 @@
+require(["./hashpasslib"], function(hashpasslib) { // Start of module.
+
 mocha.setup('tdd');
+mocha.checkLeaks();
+mocha.run();
 
 suite("HashPassAlg", function() {
   setup(function() {
-    this.hp = HashPass();
-
     this._test_site = function(rerolls, master, slug, result) {
       // Test one site password, ignores the reroll parameter.
-      expect(this.hp.make_password(master, slug)).to.equal(result);
+      expect(hashpasslib.make_password(master, slug)).to.equal(result);
     };
   });
 
   test("is_good_pass", function() {
-    expect(this.hp.is_good_pass("a4#aaaaaaaaaaaaaaaaa")).to.be(true);
-    expect(this.hp.is_good_pass("oooo6o#ooaaaaaaaaaaa")).to.be(true);
-    expect(this.hp.is_good_pass("")).to.be(false);
-    expect(this.hp.is_good_pass("oeuoeuOOO2343")).to.be(false);
+    expect(hashpasslib.is_good_pass("a4#aaaaaaaaaaaaaaaaa")).to.be(true);
+    expect(hashpasslib.is_good_pass("oooo6o#ooaaaaaaaaaaa")).to.be(true);
+    expect(hashpasslib.is_good_pass("")).to.be(false);
+    expect(hashpasslib.is_good_pass("oeuoeuOOO2343")).to.be(false);
   });
 
   test("make_password_simple", function() {
@@ -44,3 +46,7 @@ suite("HashPassAlg", function() {
     this._test_site(7, "S1R1yyV1i0", "ZKyePZecAO", "o}JgLvJv*4cmw{rcAXBo");
   });
 });
+
+mocha.run();
+
+}); // End of module.
