@@ -2,7 +2,7 @@ import unittest
 import bcrypt
 import alg
 
-class TestToChars(unittest.TestCase):
+class TestHashPassAlg(unittest.TestCase):
     def test_make_intermediate(self):
         self.assertEqual(alg.make_intermediate("1234"),
           "$2b$13$X5A4.IjQghzyTGwc0wgRrecUMeNiIgapq6zxM07dr3UDDdHUYWLTC")
@@ -12,7 +12,7 @@ class TestToChars(unittest.TestCase):
           "$2b$13$X5A4.IjQghzyTGwc0wgRrezL8JE8j/mpXN/V6YXoldoca002NMb0a")
 
     def _test_site(self, rerolls, master, slug, result):
-        """Test one site password, ignores rerolls parameter."""
+        """Test one site password, ignores the reroll parameter."""
         self.assertEqual(result,
                 alg.make_site_password(master, slug))
 
