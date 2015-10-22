@@ -1,4 +1,3 @@
-
 function HashPass() {
   var LETTERS = "abcdefghjkmnopqrstuvwxyzABCDEFGHJKLMNPQRSTUVWXY";
   var NUMBERS = "3456789";
@@ -61,18 +60,27 @@ function HashPass() {
     });
   };
 
-  this.make_password = function(master_plain, website) {
+  var make_password = function(master_plain, website) {
+    var limit = 10000;
     var passwords = _chunks(
         hash(website + master_plain), 20)
-    while (true) {
-        passwords = passwords.filter(
-            is_good_pass)
-        if (passwords.length > 0) {
-            return passwords[0]
+    for (var i = 0; i < limit; i++) {
+        passwords.splice(2);
+        var good_passwords = passwords.filter(is_good_pass)
+        if (good_passwords.length > 0) {
+            return good_passwords[0]
         } else {
-            passwords = _chunks(
-                hash("".join(passwords)), 20)
+          passwords = _chunks(hash(passwords.join('')), 20);
         }
     }
+
+    console.error("Could not find password after "+limit+" tries.");
+    console.error("This is improbable or something is wrong.");
+    throw "Password reroll limit reached";
   };
+
+  return {
+    make_password: make_password,
+    is_good_pass: is_good_pass
+  }
 }
