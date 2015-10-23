@@ -1,4 +1,4 @@
-require(["./hashpasslib"], function(hashpasslib) { // Start of module.
+require(["./hashpasslib", "./whiplash"], function(hashpasslib, whiplash) { // Start of module.
 
 function supports_html5_storage() {
     try {
@@ -64,6 +64,8 @@ $(document).ready(function() {
         $("#main-title").addClass("strike");
     }
 
+    var make_password_channel = whiplash.make_channel(hashpasslib.make_password);
+
     // Clear the password fields after 1 minute of inactivity.
     var clearing_timer = make_timer(60*1000, function() {
         console.log("Clearing password fields after timeout.");
@@ -81,8 +83,11 @@ $(document).ready(function() {
         if (master_val === "" || website_val === "") {
             $("#password").val("");
         } else {
-            var pass = hashpasslib.make_password(master_val, website_val);
-            $("#password").val(pass);
+            $("#password").val("...");
+            // Use the "make_password" channel.
+            make_password_channel(master_val, website_val, function(pass) {
+                $("#password").val(pass);
+            });
         }
     }
 

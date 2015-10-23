@@ -61,7 +61,9 @@ var hash = function(string) {
   });
 };
 
-var make_password = function(master_plain, website) {
+var make_password = function(master_plain, website, cb) {
+  // Turns the password + slug into a 20 character password.
+  // The password is_good_pass and is deterministic.
   var limit = 10000;
   var passwords = _chunks(
       hash(website + master_plain), 20)
@@ -69,7 +71,11 @@ var make_password = function(master_plain, website) {
       passwords.splice(2);
       var good_passwords = passwords.filter(is_good_pass)
       if (good_passwords.length > 0) {
-          return good_passwords[0]
+        // Return the valid password.
+        setTimeout(function() {
+          cb(good_passwords[0])
+        });
+        return;
       } else {
         passwords = _chunks(hash(passwords.join('')), 20);
       }
