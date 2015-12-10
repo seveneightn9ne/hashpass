@@ -56,6 +56,15 @@ def send_to_clipboard(text):
         import pyperclip
         pyperclip.copy(text)
 
+def log_slug(slug):
+    """
+    Add a slug to the slug log.
+    Temporary personal method, should be modified later to be encrypted with master.
+    """
+    filepath = os.path.expanduser("~/.config/hashpass/slug.log")
+    with open(filepath, "a+") as f:
+        f.write(slug + "\n")
+
 def cli(arguments):
     """ runs the app with the CLI as the user interface """
     use_bcrypt = arguments['--bcrypt']
@@ -65,6 +74,7 @@ def cli(arguments):
     if arguments['<website>']:
         w = arguments['<website>']
         result = make_password(w)
+        log_slug(w)
         if arguments['--show']:
             print result
         else:
@@ -79,6 +89,7 @@ def cli(arguments):
                 return
             if w == "":
                 return
+            log_slug(w)
             result = make_password(w)
             if arguments['--show']:
                 print result
