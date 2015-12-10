@@ -7,6 +7,7 @@ Everything here is stateless.
 
 import bcrypt
 import hashlib
+import hmac
 
 
 # Salt for generating intermediate. (13 rounds)
@@ -32,11 +33,12 @@ def make_intermediate(secret_master):
     """
     return bcrypt.hashpw(secret_master, REUSED_BCRYPT_SALT)
 
-def make_site_password(secret_intermediate, slug):
+def make_site_password(secret_intermediate, slug, old=True):
     """Generate a site password from the secret_intermediate and site name.
 
     1. Concatenate secret_intermediate with slug.
-    2. Hash (SHA256) to produce two candidates.
+    2. Hash (HMAC-Sha256) to produce two candidates.
+       (for old=True, uses Sha256(slug || secret_intermediate))
     3. Convert to output character set.
     4. Re-roll if candidates do not satisfy constraints.
 
@@ -52,8 +54,12 @@ def make_site_password(secret_intermediate, slug):
     """
     limit = 10000
     reroll_count = 0
-    combined = "{}{}".format(slug, secret_intermediate)
-    hashed_string = hashlib.sha256(combined).digest()
+
+    if old:
+        hashed_string = _old_hash(secret_intermediate, slug)
+    else:
+        hashed_string = _new_hash(secret_intermediate, slug)
+
     for _ in xrange(limit):
         hashed_bytes = map(ord, hashed_string)
         assert len(hashed_bytes) == 32
@@ -68,7 +74,10 @@ def make_site_password(secret_intermediate, slug):
             reroll_count += 2
             # Repeatedly hash to re-roll.
             # This rehash throws out the last 2 bytes each round.
-            hashed_string = hashlib.sha256("".join(candidates)).digest()
+            if old:
+                hashed_string = _old_hash("", "".join(candidates))
+            else:
+                hashed_string = _new_hash(secret_intermediate, "".join(candidates))
 
     print "Could not find password after {} tries.".format(limit)
     print "This is improbable or something is wrong."
@@ -164,3 +173,10 @@ def _bytes_to_password_candidate(bytez):
     converted = "".join(char_tuples)
     assert len(converted) == 20
     return converted
+
+def _old_hash(secret, data):
+    combined = "{}{}".format(data, secret)
+    return hashlib.sha256(combined).digest()
+
+def _new_hash(secret, data):
+    return hmac.new(key=secret, msg=data, digestmod=hashlib.sha256).digest()
