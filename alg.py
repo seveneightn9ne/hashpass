@@ -11,6 +11,7 @@ import hmac
 
 
 # Salt for generating intermediate. (13 rounds)
+# REUSED_BCRYPT_SALT = bcrypt.gensalt(rounds=13)
 REUSED_BCRYPT_SALT = "$2b$13$X5A4.IjQghzyTGwc0wgRre"
 # Rounds to use for storage.
 STORE_BCRYPT_ROUNDS = 13
@@ -33,14 +34,8 @@ def make_intermediate(secret_master):
     """
     return bcrypt.hashpw(secret_master, REUSED_BCRYPT_SALT)
 
-def make_site_password(secret_intermediate, slug, old=True):
+def make_site_password(secret_intermediate, slug, old):
     """Generate a site password from the secret_intermediate and site name.
-
-    1. Concatenate secret_intermediate with slug.
-    2. Hash (HMAC-Sha256) to produce two candidates.
-       (for old=True, uses Sha256(slug || secret_intermediate))
-    3. Convert to output character set.
-    4. Re-roll if candidates do not satisfy constraints.
 
     Args:
         secret_intermediate: The secret component derived from the master.
@@ -52,13 +47,45 @@ def make_site_password(secret_intermediate, slug, old=True):
         - is_good_pass
         - deterministic
     """
+    if old:
+        return make_site_password_old(secret_intermediate, slug)
+    else:
+        return make_site_password_new(secret_intermediate, slug)
+
+def make_site_password_new(secret_intermediate, slug):
+    """
+    1. Concatenate [slug || counter || generation].
+    2. Hash (HMAC-Sha256) with secret_intermediate as the key.
+    3. Truncate and convert to output character set.
+    4. Try again with counter++ if candidate does not satisfy constraints.
+    """
+    limit = 10000
+    generation = 1 # can be used for future features.
+    for counter in xrange(limit):
+        combined = "{}{}{}".format(slug, str(generation), str(counter))
+        hashed_string = _new_hash(secret_intermediate, combined)
+        hashed_bytes = map(ord, hashed_string)
+        assert len(hashed_bytes) == 32
+        candidate = _bytes_to_password_candidate(hashed_bytes[:15])
+        if is_good_pass(candidate):
+            return candidate
+
+    print "Could not find password after {} tries.".format(limit)
+    print "This is improbable or something is wrong."
+    raise Exception("Password reroll limit reached")
+
+def make_site_password_old(secret_intermediate, slug):
+    """
+    1. Concatenate secret_intermediate with slug.
+    2. Hash (SHA256) to produce two candidates.
+    3. Convert to output character set.
+    4. Re-roll if candidates do not satisfy constraints.
+    """
+
     limit = 10000
     reroll_count = 0
 
-    if old:
-        hashed_string = _old_hash(secret_intermediate, slug)
-    else:
-        hashed_string = _new_hash(secret_intermediate, slug)
+    hashed_string = _old_hash(secret_intermediate, slug)
 
     for _ in xrange(limit):
         hashed_bytes = map(ord, hashed_string)
@@ -74,10 +101,7 @@ def make_site_password(secret_intermediate, slug, old=True):
             reroll_count += 2
             # Repeatedly hash to re-roll.
             # This rehash throws out the last 2 bytes each round.
-            if old:
-                hashed_string = _old_hash("", "".join(candidates))
-            else:
-                hashed_string = _new_hash(secret_intermediate, "".join(candidates))
+            hashed_string = _old_hash("", "".join(candidates))
 
     print "Could not find password after {} tries.".format(limit)
     print "This is improbable or something is wrong."

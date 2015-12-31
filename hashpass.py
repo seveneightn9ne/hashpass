@@ -64,7 +64,7 @@ def cli(arguments):
     get_password(use_bcrypt)
     if arguments['<website>']:
         w = arguments['<website>']
-        result = make_password(w)
+        result = make_password(w, old=(not use_bcrypt))
         if arguments['--show']:
             print result
         else:
@@ -79,7 +79,7 @@ def cli(arguments):
                 return
             if w == "":
                 return
-            result = make_password(w)
+            result = make_password(w, old=(not use_bcrypt))
             if arguments['--show']:
                 print result
             else:

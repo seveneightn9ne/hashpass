@@ -14,24 +14,24 @@ class TestHashPassAlg(unittest.TestCase):
     def _test_site(self, rerolls, master, slug, result):
         """Test one site password, ignores the reroll parameter."""
         self.assertEqual(result,
-                alg.make_site_password(master, slug))
+                alg.make_site_password(master, slug, old=True))
 
     def test_make_site_password(self):
         # reroll 0 times
         self.assertEqual("P4{tRc6X3q}5)bCw}su=",
-                alg.make_site_password("a", "b"))
+                alg.make_site_password("a", "b", old=True))
         self.assertEqual("4D*y7}fP646v3rdWEMz6",
-                alg.make_site_password("batterystapler", "sportsball"))
+                alg.make_site_password("batterystapler", "sportsball", old=True))
 
         # reroll 1 time
         self.assertEqual("C}Kzk*)6(CbR}sM5PxuK",
-                alg.make_site_password("a", "sportsball"))
+                alg.make_site_password("a", "sportsball", old=True))
 
         # bcrypted input
         self.assertEqual("M9PC77h*GmdN@?(hfxcY",
                 alg.make_site_password(
                     "$2b$13$X5A4.IjQghzyTGwc0wgRrecUMeNiIgapq6zxM07dr3UDDdHUYWLTC",
-                    "xyz"))
+                    "xyz", old=True))
 
     def test_make_site_password_more(self):
         self._test_site(0, "wwsx6kolKO", "Ckf2oCe18I", "jzebYcmJ}+8b5rye{9Dn")

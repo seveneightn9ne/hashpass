@@ -43,14 +43,14 @@ def is_correct_master(password):
         return True
     return False
 
-def make_password(slug):
+def make_password(slug, old):
     """
     Turns the password + slug into a 20 character password.
     The password is_good_pass and is deterministic.
     """
     if not session_intermediate:
         raise Exception("Cannot make password without an intermediate pw.")
-    return alg.make_site_password(session_intermediate, slug)
+    return alg.make_site_password(session_intermediate, slug, old=old)
 
 def _mkdir_p(path):
     try:
