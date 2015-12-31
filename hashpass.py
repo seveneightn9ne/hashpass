@@ -12,7 +12,10 @@ import pinentry
 
 import os.path, hashlib, getpass, sys
 from docopt import docopt
-from subprocess import Popen, PIPE
+import subprocess
+import os
+
+CLIP_SECONDS = 30
 
 def init():
     """ Saves the master password to disk if you haven't already """
@@ -46,8 +49,12 @@ def get_password(use_bcrypt):
         return get_password_cli()
 
 def send_to_clipboard(text):
-    import pyperclip
-    pyperclip.copy(text)
+    if subprocess.call(["which", "xclip"], stdout=open(os.devnull, 'wb')) == 0:
+        cliptimesh = os.path.abspath(os.path.join(os.path.dirname(__file__), "cliptime.sh"))
+        subprocess.call([cliptimesh, str(CLIP_SECONDS), text])
+    else:
+        import pyperclip
+        pyperclip.copy(text)
 
 def cli(arguments):
     """ runs the app with the CLI as the user interface """
@@ -81,4 +88,3 @@ def cli(arguments):
 
 if __name__ == "__main__":
     cli(docopt(__doc__, version='HashPass 1.0'))
-
