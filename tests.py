@@ -39,10 +39,10 @@ class TestHashPassAlg(unittest.TestCase):
         self.assertEqual(alg._bytes_to_pw_chars([255, 255, 255]), "????")
         self.assertEqual(alg._bytes_to_pw_chars([4,32,196]), "bcde")
 
-    def _test_site(self, rerolls, master, slug, result):
+    def _test_site(self, rerolls, intermediate, slug, result):
         """Test one site password, ignores the reroll parameter."""
         self.assertEqual(result,
-                alg.make_site_password(master, slug, old=False))
+                alg.make_site_password(intermediate, slug, old=False))
 
     def test_make_site_password(self):
         # reroll 0 times

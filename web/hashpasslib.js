@@ -14,6 +14,7 @@ var _to_chars = function(nums) {
       ((nums[0] & 0x3)  << 4) | ((nums[1] & 0xF0) >> 4),
       ((nums[1] & 0x0F) << 2) | ((nums[2] & 0xC0) >> 6),
       nums[2] & 0x3F];
+
   return nums4.map(function (num) {
       return charset[num]
   }).reduce(function (a, b) {
