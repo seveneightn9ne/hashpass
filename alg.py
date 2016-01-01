@@ -54,21 +54,22 @@ def make_site_password(secret_intermediate, slug, old):
 
 def make_site_password_new(secret_intermediate, slug):
     """
-    1. Concatenate [slug || counter || generation].
+    1. Concatenate (slug, generation, counter) separated by newlines.
     2. Hash (HMAC-Sha256) with secret_intermediate as the key.
     3. Truncate and convert to output character set.
     4. Try again with counter++ if candidate does not satisfy constraints.
     """
     limit = 10000
-    generation = 1 # can be used for future features.
+    generation = 0 # can be used for future features.
     for counter in xrange(limit):
-        combined = "{}{}{}".format(slug, str(generation), str(counter))
+        combined = "\n".join((slug, str(generation), str(counter)))
         hashed_string = _new_hash(secret_intermediate, combined)
         hashed_bytes = map(ord, hashed_string)
         assert len(hashed_bytes) == 32
         candidate = _bytes_to_password_candidate(hashed_bytes[:15])
         if is_good_pass(candidate):
-            return candidate
+            return candidate# TODO(miles): remove these counter lines.
+            return (counter, candidate)# TODO(miles): remove these counter lines.
 
     print "Could not find password after {} tries.".format(limit)
     print "This is improbable or something is wrong."

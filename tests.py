@@ -3,6 +3,11 @@ import bcrypt
 import alg
 
 class TestHashPassAlg(unittest.TestCase):
+    def setUp(self):
+        self.intermediates = [
+            "$2b$13$X5A4.IjQghzyTGwc0wgRrebu3hlW/WFyN5GnvrTKvYsJtdsr5DXC6",
+            "$2b$13$X5A4.IjQghzyTGwc0wgRrejiTwszgBLaN3PTew0gRtIrzb5EHsZB2",]
+
     def test_make_intermediate(self):
         self.assertEqual(alg.make_intermediate("1234"),
           "$2b$13$X5A4.IjQghzyTGwc0wgRrecUMeNiIgapq6zxM07dr3UDDdHUYWLTC")
@@ -34,6 +39,34 @@ class TestHashPassAlg(unittest.TestCase):
         self.assertEqual(alg._bytes_to_pw_chars([255, 255, 255]), "????")
         self.assertEqual(alg._bytes_to_pw_chars([4,32,196]), "bcde")
 
+    def _test_site(self, rerolls, master, slug, result):
+        """Test one site password, ignores the reroll parameter."""
+        self.assertEqual(result,
+                alg.make_site_password(master, slug, old=False))
+
+    def test_make_site_password(self):
+        # reroll 0 times
+        self.assertEqual("?T7}LNgNP)KkEYRATQ6m",
+                alg.make_site_password(self.intermediates[0], "b", old=False))
+        self.assertEqual("DuR49nd4W7@fEyH)M?Xk",
+                alg.make_site_password(self.intermediates[1], "b", old=False))
+
+        # reroll 1 time
+        self.assertEqual("frP}JsfQXxjp5FTt}y{k",
+                alg.make_site_password(self.intermediates[0], "blunderbus40", old=False))
+        self.assertEqual("NquDtLpKUhSRS7TgBY}f",
+                alg.make_site_password(self.intermediates[1], "sportsball", old=False))
+
+
+    def test_make_site_password_more(self):
+        self._test_site(3, self.intermediates[0],
+                        "blunderbus67555", "q7=s(}5nFgQEr8}JXoxv")
+        self._test_site(4, self.intermediates[0],
+                        "blunderbus67679", "3dfdqnu@YfBGx)}*ByQ3")
+        self._test_site(6, self.intermediates[0],
+                        "blunderbus403936", "V5Wuv?4kG*(?X)bpw?}V")
+        self._test_site(6, self.intermediates[0],
+                        "blunderbus463867", "TDpxs?Fs#5SQ5*rCX#=z")
 
 class TestHashPassAlgOld(unittest.TestCase):
     def _test_site(self, rerolls, master, slug, result):
