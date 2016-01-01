@@ -4,7 +4,7 @@
 // Ideally, we want a request to cancel all old requests.
 
 // Example usage:
-// slowadd_channel = make_chanell(slowadd);
+// slowadd_channel = make_channel(slowadd);
 // onClick(function() {
 //   slowadd_channel(a, b, function(r) {
 //     view.display(r);
