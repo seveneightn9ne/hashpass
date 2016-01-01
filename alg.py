@@ -32,6 +32,8 @@ def make_intermediate(secret_master):
         An intermediate which is a bcrypt output string.
         Keep it secret, keep it safe, don't leave memory.
     """
+    if len(secret_master) > 72:
+        raise Exception("Bcrypt does not support passwords longer than 72 bytes.")
     return bcrypt.hashpw(secret_master, REUSED_BCRYPT_SALT)
 
 def make_site_password(secret_intermediate, slug, old):
@@ -129,6 +131,8 @@ def make_storeable(secret_master):
     Returns:
         A bcrypted string.
     """
+    if len(secret_master) > 72:
+        raise Exception("Bcrypt does not support passwords longer than 72 bytes.")
     return bcrypt.hashpw(secret_master, bcrypt.gensalt(rounds=STORE_BCRYPT_ROUNDS))
 
 def check_stored(secret_master, stored_component):
@@ -137,6 +141,8 @@ def check_stored(secret_master, stored_component):
     Returns:
         A bool of whether it is a match.
     """
+    if len(secret_master) > 72:
+        raise Exception("Bcrypt does not support passwords longer than 72 bytes.")
     unverified_hash = bcrypt.hashpw(secret_master, stored_component)
     return unverified_hash == stored_component
 
