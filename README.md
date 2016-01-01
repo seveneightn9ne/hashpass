@@ -31,4 +31,9 @@ HTTPS it will give a big ugly warning.
 See [`manifesto.md`](https://github.com/seveneightn9ne/hashpass/blob/master/manifesto.md) for
 a full explanation of the algorithm and why it's secure.
 
+## Running the tests.
 
+To run the tests for the python client run:
+```shell
+python tests.py
+```
