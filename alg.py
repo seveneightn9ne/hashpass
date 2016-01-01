@@ -68,8 +68,7 @@ def make_site_password_new(secret_intermediate, slug):
         assert len(hashed_bytes) == 32
         candidate = _bytes_to_password_candidate(hashed_bytes[:15])
         if is_good_pass(candidate):
-            return candidate# TODO(miles): remove these counter lines.
-            return (counter, candidate)# TODO(miles): remove these counter lines.
+            return candidate
 
     print "Could not find password after {} tries.".format(limit)
     print "This is improbable or something is wrong."
