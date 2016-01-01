@@ -16,6 +16,10 @@ class TestHashPassAlg(unittest.TestCase):
         self.assertEqual(alg.make_intermediate("blowfish"),
           "$2b$13$X5A4.IjQghzyTGwc0wgRrezL8JE8j/mpXN/V6YXoldoca002NMb0a")
 
+    def test_make_intermediate_too_long(self):
+        with self.assertRaises(Exception):
+            alg.make_intermediate("x" * 73)
+
     def test_is_good_pass(self):
         self.assertTrue(alg.is_good_pass("a4#aaaaaaaaaaaaaaaaa"))
         self.assertTrue(alg.is_good_pass("oooo6o#ooaaaaaaaaaaa"))
