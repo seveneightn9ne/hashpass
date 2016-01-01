@@ -11,6 +11,31 @@ class TestHashPassAlg(unittest.TestCase):
         self.assertEqual(alg.make_intermediate("blowfish"),
           "$2b$13$X5A4.IjQghzyTGwc0wgRrezL8JE8j/mpXN/V6YXoldoca002NMb0a")
 
+    def test_is_good_pass(self):
+        self.assertTrue(alg.is_good_pass("a4#aaaaaaaaaaaaaaaaa"))
+        self.assertTrue(alg.is_good_pass("oooo6o#ooaaaaaaaaaaa"))
+        self.assertFalse(alg.is_good_pass(""))
+        self.assertFalse(alg.is_good_pass("oeuoeuOOO2343"))
+
+    def test_make_storeable(self):
+        secret = "abcdef"
+        stored = alg.make_storeable(secret)
+        self.assertTrue(bcrypt.hashpw(secret, stored) == stored)
+
+    def test_check_stored(self):
+        # Test with an 11 round bcrypt.
+        secret = "blowfish"
+        stored = "$2b$11$Gzhmkebfiz2OapRqu/zWSOH2Wa9uAsbb4Vd5q3iKBILsMRX8MBpQa"
+        self.assertTrue(alg.check_stored(secret, stored))
+        self.assertFalse(alg.check_stored(secret[:-1], stored))
+
+    def test_bytes_to_pw_chars(self):
+        self.assertEqual(alg._bytes_to_pw_chars([0, 0, 0]), "aaaa")
+        self.assertEqual(alg._bytes_to_pw_chars([255, 255, 255]), "????")
+        self.assertEqual(alg._bytes_to_pw_chars([4,32,196]), "bcde")
+
+
+class TestHashPassAlgOld(unittest.TestCase):
     def _test_site(self, rerolls, master, slug, result):
         """Test one site password, ignores the reroll parameter."""
         self.assertEqual(result,
@@ -55,29 +80,6 @@ class TestHashPassAlg(unittest.TestCase):
         self._test_site(5, "iSqlhru8op", "gJiWkK4JcO", "8wTU=am6g{=3BfoL}fuY")
         self._test_site(6, "d9bqrOq7mN", "0ZSK8Ij1RT", "CgK9{jp=8vVgt=8)fJgU")
         self._test_site(7, "S1R1yyV1i0", "ZKyePZecAO", "o}JgLvJv*4cmw{rcAXBo")
-
-    def test_is_good_pass(self):
-        self.assertTrue(alg.is_good_pass("a4#aaaaaaaaaaaaaaaaa"))
-        self.assertTrue(alg.is_good_pass("oooo6o#ooaaaaaaaaaaa"))
-        self.assertFalse(alg.is_good_pass(""))
-        self.assertFalse(alg.is_good_pass("oeuoeuOOO2343"))
-
-    def test_make_storeable(self):
-        secret = "abcdef"
-        stored = alg.make_storeable(secret)
-        self.assertTrue(bcrypt.hashpw(secret, stored) == stored)
-
-    def test_check_stored(self):
-        # Test with an 11 round bcrypt.
-        secret = "blowfish"
-        stored = "$2b$11$Gzhmkebfiz2OapRqu/zWSOH2Wa9uAsbb4Vd5q3iKBILsMRX8MBpQa"
-        self.assertTrue(alg.check_stored(secret, stored))
-        self.assertFalse(alg.check_stored(secret[:-1], stored))
-
-    def test_bytes_to_pw_chars(self):
-        self.assertEqual(alg._bytes_to_pw_chars([0, 0, 0]), "aaaa")
-        self.assertEqual(alg._bytes_to_pw_chars([255, 255, 255]), "????")
-        self.assertEqual(alg._bytes_to_pw_chars([4,32,196]), "bcde")
 
 
 if __name__ == '__main__':
