@@ -37,3 +37,5 @@ To run the tests for the python client run:
 ```shell
 python tests.py
 ```
+
+To run the tests for the web client run visit `web/tests.html`.

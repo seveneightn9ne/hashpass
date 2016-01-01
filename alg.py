@@ -12,7 +12,7 @@ import hmac
 
 # Salt for generating intermediate. (13 rounds)
 # REUSED_BCRYPT_SALT = bcrypt.gensalt(rounds=13)
-REUSED_BCRYPT_SALT = "$2b$13$X5A4.IjQghzyTGwc0wgRre"
+REUSED_BCRYPT_SALT = "$2y$13$X5A4.IjQghzyTGwc0wgRre"
 # Rounds to use for storage.
 STORE_BCRYPT_ROUNDS = 13
 
@@ -54,12 +54,15 @@ def make_site_password(secret_intermediate, slug, old):
     else:
         return make_site_password_new(secret_intermediate, slug)
 
-def make_site_password_new(secret_intermediate, slug):
+def make_site_password_new(secret_intermediate, slug, out_extra=False):
     """
     1. Concatenate (slug, generation, counter) separated by newlines.
     2. Hash (HMAC-Sha256) with secret_intermediate as the key.
     3. Truncate and convert to output character set.
     4. Try again with counter++ if candidate does not satisfy constraints.
+
+    Args:
+        out_ctr: Whether to output a tuple of (generation, counter, result)
     """
     limit = 10000
     generation = 0 # can be used for future features.
@@ -70,7 +73,10 @@ def make_site_password_new(secret_intermediate, slug):
         assert len(hashed_bytes) == 32
         candidate = _bytes_to_password_candidate(hashed_bytes[:15])
         if is_good_pass(candidate):
-            return candidate
+            if out_extra:
+                return (generation, counter, candidate)
+            else:
+                return candidate
 
     print "Could not find password after {} tries.".format(limit)
     print "This is improbable or something is wrong."

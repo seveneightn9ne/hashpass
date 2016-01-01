@@ -17,6 +17,9 @@ body {
     font-size: 1em;
 }
 #save { font-size: 1em; }
+#master.thinking {
+    border-color: #6f5499;
+}
 #master.correct {
     border-color: #0F0;
 }

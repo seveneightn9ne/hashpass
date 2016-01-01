@@ -2,10 +2,12 @@ require(["./hashpasslib", "./whiplash"], function(hashpasslib, whiplash) { // St
 
 var LOCAL_MASTER_HASH_KEY = "master_hash";
 
-function save_master(master) {
+function save_master(master, cb_progress, cb_finished) {
     var salt = TwinBcrypt.genSalt(13);
-    var hashed_master = TwinBcrypt.hashSync(master, salt);
-    localStorage.setItem(LOCAL_MASTER_HASH_KEY, hashed_master);
+    var hashed_master = TwinBcrypt.hash(master, salt, cb_progress, function(hashed) {
+        localStorage.setItem(LOCAL_MASTER_HASH_KEY, hashed);
+        cb_finished();
+    });
 }
 
 function saved_master() {
@@ -20,8 +22,8 @@ function clear_saved_master() {
     localStorage.removeItem(LOCAL_MASTER_HASH_KEY);
 }
 
-function check_master(entered_master) {
-    return TwinBcrypt.compareSync(entered_master, saved_master());
+function check_master(entered_master, cb_progress, cb_finished) {
+    return TwinBcrypt.compare(entered_master, saved_master(), cb_progress, cb_finished);
 }
 
 function make_timer(ms, callback) {
@@ -47,7 +49,7 @@ $(document).ready(function() {
         $("#main-title").addClass("strike");
     }
 
-    var make_password_channel = whiplash.make_channel(hashpasslib.make_password);
+    var bcrypt_compute_marker = {};
 
     // Clear the password fields after 1 minute of inactivity.
     var clearing_timer = make_timer(60*1000, function() {
@@ -66,11 +68,8 @@ $(document).ready(function() {
         if (master_val === "" || website_val === "") {
             $("#password").val("");
         } else {
-            $("#password").val("...");
-            // Use the "make_password" channel.
-            make_password_channel(master_val, website_val, function(pass) {
-                $("#password").val(pass);
-            });
+            var passwd = make_site_password(master_val, website_val);
+            $("#password").val(passwd);
         }
     }
 
@@ -83,34 +82,69 @@ $(document).ready(function() {
 
     $("#master").on('input', function() {
         clearing_timer.bump();
-        if (has_saved_master()) {
-            if (check_master($(this).val())) {
-                $(this).addClass("correct");
-                $(this).removeClass("incorrect");
-            } else {
-                $(this).removeClass("correct");
-                if ($(this).val() != "") {
-                    $(this).addClass("incorrect");
-                } else {
-                    $(this).removeClass("incorrect");
-                }
-            }
+
+        // Cause previous comparisons to stop.
+        var local_bcrypt_compute_marker = {};
+        bcrypt_compute_marker = local_bcrypt_compute_marker;
+
+        update_save_ui();
+
+        $(this).removeClass("correct incorrect thinking");
+        if ($(this).val() == "") {
+            return;
         }
+
+        if (has_saved_master()) {
+            $(this).addClass("thinking");
+            check_master($(this).val(), function(p) {
+                return bcrypt_compute_marker === local_bcrypt_compute_marker;
+            }.bind(this), function(matched) {
+                $(this).removeClass("correct incorrect thinking");
+                if (matched) {
+                    $(this).addClass("correct");
+                } else {
+                    if ($(this).val() != "") {
+                        $(this).addClass("incorrect");
+                    } else {
+                        $(this).removeClass("incorrect");
+                    }
+                }
+            }.bind(this));
+        }
+
         recalculate_result();
     });
 
     function onsave() {
         clearing_timer.bump();
-        save_master($("#master").val());
+        var local_bcrypt_compute_marker = {};
+        bcrypt_compute_marker = local_bcrypt_compute_marker;
+        save_master($("#master").val(), function(p) {
+            return bcrypt_compute_marker === local_bcrypt_compute_marker;
+        }, function() {
+            update_save_ui();
+        });
         $("#save").fadeOut();
-        $("#clear").show();
-        $("#master").addClass("correct");
     };
+
+    function update_save_ui() {
+        if (has_saved_master()) {
+            $("#save").fadeOut();
+            $("#clear").show();
+        } else {
+            $("#save").show();
+            $("#clear").hide();
+        }
+    }
 
     $("#save").click(onsave);
 
     $("#clear").click(function() {
         clearing_timer.bump();
+
+        // Cancel existing computations.
+        bcrypt_compute_marker = {};
+
         clear_saved_master();
         $(this).fadeOut();
         $("#save").show();

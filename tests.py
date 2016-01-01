@@ -1,4 +1,12 @@
+#!/usr/bin/env python
+"""
+Usage:
+    tests.py
+    tests.py --find <seed> <rerolls> [<count>]
+"""
+from docopt import docopt
 import unittest
+import sys
 import bcrypt
 import alg
 import binascii
@@ -8,16 +16,16 @@ import hashlib
 class TestHashPassAlg(unittest.TestCase):
     def setUp(self):
         self.intermediates = [
-            "$2b$13$X5A4.IjQghzyTGwc0wgRrebu3hlW/WFyN5GnvrTKvYsJtdsr5DXC6",
-            "$2b$13$X5A4.IjQghzyTGwc0wgRrejiTwszgBLaN3PTew0gRtIrzb5EHsZB2",]
+            "$2y$13$X5A4.IjQghzyTGwc0wgRrebu3hlW/WFyN5GnvrTKvYsJtdsr5DXC6",
+            "$2y$13$X5A4.IjQghzyTGwc0wgRrejiTwszgBLaN3PTew0gRtIrzb5EHsZB2",]
 
     def test_make_intermediate(self):
         self.assertEqual(alg.make_intermediate("1234"),
-          "$2b$13$X5A4.IjQghzyTGwc0wgRrecUMeNiIgapq6zxM07dr3UDDdHUYWLTC")
+          "$2y$13$X5A4.IjQghzyTGwc0wgRrecUMeNiIgapq6zxM07dr3UDDdHUYWLTC")
         self.assertEqual(alg.make_intermediate("super secret"),
-          "$2b$13$X5A4.IjQghzyTGwc0wgRrejDmecj5/NNmPPb5ok4tXNuhs/rdP5zy")
+          "$2y$13$X5A4.IjQghzyTGwc0wgRrejDmecj5/NNmPPb5ok4tXNuhs/rdP5zy")
         self.assertEqual(alg.make_intermediate("blowfish"),
-          "$2b$13$X5A4.IjQghzyTGwc0wgRrezL8JE8j/mpXN/V6YXoldoca002NMb0a")
+          "$2y$13$X5A4.IjQghzyTGwc0wgRrezL8JE8j/mpXN/V6YXoldoca002NMb0a")
 
     def test_make_intermediate_too_long(self):
         with self.assertRaises(Exception):
@@ -37,7 +45,7 @@ class TestHashPassAlg(unittest.TestCase):
     def test_check_stored(self):
         # Test with an 11 round bcrypt.
         secret = "blowfish"
-        stored = "$2b$11$Gzhmkebfiz2OapRqu/zWSOH2Wa9uAsbb4Vd5q3iKBILsMRX8MBpQa"
+        stored = "$2y$11$Gzhmkebfiz2OapRqu/zWSOH2Wa9uAsbb4Vd5q3iKBILsMRX8MBpQa"
         self.assertTrue(alg.check_stored(secret, stored))
         self.assertFalse(alg.check_stored(secret[:-1], stored))
 
@@ -60,32 +68,22 @@ class TestHashPassAlg(unittest.TestCase):
 
     def _test_site(self, rerolls, intermediate, slug, result):
         """Test one site password, ignores the reroll parameter."""
-        self.assertEqual(result,
-                alg.make_site_password(intermediate, slug, old=False))
+        self.assertEqual(result, alg.make_site_password(intermediate, slug, old=False))
 
     def test_make_site_password(self):
-        # reroll 0 times
-        self.assertEqual("?T7}LNgNP)KkEYRATQ6m",
-                alg.make_site_password(self.intermediates[0], "b", old=False))
-        self.assertEqual("DuR49nd4W7@fEyH)M?Xk",
-                alg.make_site_password(self.intermediates[1], "b", old=False))
-
-        # reroll 1 time
-        self.assertEqual("frP}JsfQXxjp5FTt}y{k",
-                alg.make_site_password(self.intermediates[0], "blunderbus40", old=False))
-        self.assertEqual("NquDtLpKUhSRS7TgBY}f",
-                alg.make_site_password(self.intermediates[1], "sportsball", old=False))
-
+        # 0 rerolls.
+        self._test_site(0, self.intermediates[0], "ping0", "yAhnTfcJd#g3UpB7p3Fa")
+        self._test_site(0, self.intermediates[1], "ping0", "Rsgdca3E9E(7KU=JMY3o")
+        # 1 reroll.
+        self._test_site(1, self.intermediates[0], "ping6", "s*t}?z8xzAAWd3#LSAcS")
+        self._test_site(1, self.intermediates[1], "ping2", "5E)@{TRxkS=+WT=}N4sT")
 
     def test_make_site_password_more(self):
-        self._test_site(3, self.intermediates[0],
-                        "blunderbus67555", "q7=s(}5nFgQEr8}JXoxv")
-        self._test_site(4, self.intermediates[0],
-                        "blunderbus67679", "3dfdqnu@YfBGx)}*ByQ3")
-        self._test_site(6, self.intermediates[0],
-                        "blunderbus403936", "V5Wuv?4kG*(?X)bpw?}V")
-        self._test_site(6, self.intermediates[0],
-                        "blunderbus463867", "TDpxs?Fs#5SQ5*rCX#=z")
+        # Higher reroll counts.
+        self._test_site(3, self.intermediates[0], "ping11", "m=vTw7@JhaYGmsF8p9qN")
+        self._test_site(4, self.intermediates[0], "ping7956", "dEVK@9L@XQ?gr{59(pv?")
+        self._test_site(6, self.intermediates[0], "ping166039", "HppQ3vP6ba)wLeG?YUBN")
+        self._test_site(6, self.intermediates[0], "ping343496", "jGL+qAXTF4XG9fe39n=@")
 
 class TestHashPassAlgOld(unittest.TestCase):
     def _test_site(self, rerolls, master, slug, result):
@@ -135,4 +133,22 @@ class TestHashPassAlgOld(unittest.TestCase):
 
 
 if __name__ == "__main__":
-    unittest.main()
+    arguments = docopt(__doc__, version="1.0")
+    if arguments["--find"]:
+        intermediate = "$2y$13$X5A4.IjQghzyTGwc0wgRrebu3hlW/WFyN5GnvrTKvYsJtdsr5DXC6"
+        print "intermediate", intermediate
+        seed = arguments["<seed>"]
+        rerolls = int(arguments["<rerolls>"])
+        count = int(arguments["<count>"]) or 1
+        found = 0
+        for i in xrange(1000000):
+            if found >= count:
+                sys.exit(0)
+            slug = seed + str(i)
+            (generation, counter, result) = alg.make_site_password_new(
+                intermediate, slug, out_extra=True)
+            if counter == rerolls:
+                print rerolls, slug, result
+                found += 1
+    else:
+        unittest.main()
