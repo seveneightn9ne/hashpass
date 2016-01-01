@@ -1,6 +1,9 @@
 import unittest
 import bcrypt
 import alg
+import binascii
+import hmac
+import hashlib
 
 class TestHashPassAlg(unittest.TestCase):
     def setUp(self):
@@ -42,6 +45,18 @@ class TestHashPassAlg(unittest.TestCase):
         self.assertEqual(alg._bytes_to_pw_chars([0, 0, 0]), "aaaa")
         self.assertEqual(alg._bytes_to_pw_chars([255, 255, 255]), "????")
         self.assertEqual(alg._bytes_to_pw_chars([4,32,196]), "bcde")
+
+    def test_hmac(self):
+        secret = binascii.a2b_hex("4a656665")
+        data = binascii.a2b_hex("7768617420646f2079612077616e7420666f72206e6f7468696e673f")
+        expected = binascii.a2b_hex("5bdcc146bf60754e6a042426089575c75a003f089d2739839dec58b964ec3843")
+        out = hmac.new(key=secret, msg=data, digestmod=hashlib.sha256).digest()
+        self.assertEqual(expected, out)
+
+    def test_hash(self):
+        expected_hex = "5bdcc146bf60754e6a042426089575c75a003f089d2739839dec58b964ec3843"
+        hashres = alg._new_hash("Jefe", "what do ya want for nothing?")
+        self.assertEqual(binascii.a2b_hex(expected_hex), hashres)
 
     def _test_site(self, rerolls, intermediate, slug, result):
         """Test one site password, ignores the reroll parameter."""
@@ -119,5 +134,5 @@ class TestHashPassAlgOld(unittest.TestCase):
         self._test_site(7, "S1R1yyV1i0", "ZKyePZecAO", "o}JgLvJv*4cmw{rcAXBo")
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     unittest.main()
