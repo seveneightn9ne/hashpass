@@ -9,12 +9,12 @@ var LETTERS = "abcdefghjkmnopqrstuvwxyzABCDEFGHJKLMNPQRSTUVWXY";
 var NUMBERS = "3456789";
 var SYMBOLS = "#*@()+={}?";
 
-var make_intermediate = function(secret_master, cb_success) {
+var make_intermediate = function(secret_master, cb_progress, cb_success) {
   if (secret_master.length > 72) {
     console.error("Bcrypt does not support passwords longer than 72 bytes.");
     throw new Error("Bcrypt limit exceeded.");
   }
-  TwinBcrypt.hash(secret_master, REUSED_BCRYPT_SALT, function() {}, cb_success)
+  TwinBcrypt.hash(secret_master, REUSED_BCRYPT_SALT, cb_progress, cb_success)
 };
 
 var make_site_password = function(secret_intermediate, slug) {
@@ -62,21 +62,21 @@ var is_good_pass = function(password) {
           contains_some(password, SYMBOLS))
 };
 
-var make_storeable = function(secret_master, cb_success) {
+var make_storeable = function(secret_master, cb_progress, cb_success) {
   if (secret_master.length > 72) {
     console.error("Bcrypt does not support passwords longer than 72 bytes.");
     throw new Error("Bcrypt limit exceeded.");
   }
-  TwinBcrypt.hash(secret_master, TwinBcrypt.genSalt(STORE_BCRYPT_ROUNDS), function() {}, cb_success)
+  TwinBcrypt.hash(secret_master, TwinBcrypt.genSalt(STORE_BCRYPT_ROUNDS), cb_progress, cb_success)
 }
 
-var check_stored = function(secret_master, stored_component, cb_success) {
+var check_stored = function(secret_master, stored_component, cb_progress, cb_success) {
   if (secret_master.length > 72) {
     console.error("Bcrypt does not support passwords longer than 72 bytes.");
     throw new Error("Bcrypt limit exceeded.");
   }
   try {
-    TwinBcrypt.compare(secret_master, stored_component, function() {}, cb_success);
+    TwinBcrypt.compare(secret_master, stored_component, cb_progress, cb_success);
   } catch (e) {
     cb_success(false);
   };

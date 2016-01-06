@@ -19,27 +19,29 @@ suite("HashPassAlg", function() {
   test("make_intermediate too long", function() {
     var x73 = "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx";
     expect(function() {
-      hashpasslib.make_intermediate(x73, function() {})
+      hashpasslib.make_intermediate(x73, function(){}, function() {})
     }).to.throwException(new Error("Bcrypt limit exceeded."));
   });
 
+  var SLOW_LIMIT = 20000;
+
   test("make_intermediate", function(done) {
-    this.timeout(5000);
-    hashpasslib.make_intermediate("1234", function(result) {
+    this.timeout(SLOW_LIMIT);
+    hashpasslib.make_intermediate("1234", function(){}, function(result) {
       expect(result).to.equal("$2y$13$X5A4.IjQghzyTGwc0wgRrecUMeNiIgapq6zxM07dr3UDDdHUYWLTC");
       done();
     });
   });
   test("make_intermediate", function(done) {
-    this.timeout(5000);
-    hashpasslib.make_intermediate("super secret", function(result) {
+    this.timeout(SLOW_LIMIT);
+    hashpasslib.make_intermediate("super secret", function(){}, function(result) {
       expect(result).to.equal("$2y$13$X5A4.IjQghzyTGwc0wgRrejDmecj5/NNmPPb5ok4tXNuhs/rdP5zy");
       done();
     });
   });
   test("make_intermediate", function(done) {
-    this.timeout(5000);
-    hashpasslib.make_intermediate("blowfish", function(result) {
+    this.timeout(SLOW_LIMIT);
+    hashpasslib.make_intermediate("blowfish", function(){}, function(result) {
       expect(result).to.equal("$2y$13$X5A4.IjQghzyTGwc0wgRrezL8JE8j/mpXN/V6YXoldoca002NMb0a");
       done();
     });
@@ -53,9 +55,9 @@ suite("HashPassAlg", function() {
   });
 
   test("make_storeable", function(done) {
-    this.timeout(5000);
+    this.timeout(SLOW_LIMIT);
     var secret = "abcdef";
-    hashpasslib.make_storeable(secret, function(storeable) {
+    hashpasslib.make_storeable(secret, function(){}, function(storeable) {
       TwinBcrypt.compare(secret, storeable, function(){}, function(result) {
         expect(result).to.be(true);
         done();
@@ -67,7 +69,7 @@ suite("HashPassAlg", function() {
     // Test with an 11 round bcrypt.
     var secret = "blowfish";
     var stored = "$2y$11$Gzhmkebfiz2OapRqu/zWSOH2Wa9uAsbb4Vd5q3iKBILsMRX8MBpQa";
-    hashpasslib.check_stored(secret, stored, function(result) {
+    hashpasslib.check_stored(secret, stored, function(){}, function(result) {
       expect(result).to.be(true);
       done();
     });
@@ -78,7 +80,7 @@ suite("HashPassAlg", function() {
     var secret = "blowfish";
     // This stored hash does not match the secret.
     var stored = "$2y$11$Gzhmkebfiz2OapRqu/zwSOH2Wa9uAsbb4Vd5q3iKBILsMRX8MBpQa";
-    hashpasslib.check_stored(secret, stored, function(result) {
+    hashpasslib.check_stored(secret, stored, function(){}, function(result) {
       expect(result).to.be(false);
       done();
     });
@@ -89,7 +91,7 @@ suite("HashPassAlg", function() {
     var secret = "blowfish";
     // This stored hash does not match the secret.
     var stored = "bogus";
-    hashpasslib.check_stored(secret, stored, function(result) {
+    hashpasslib.check_stored(secret, stored, function(){}, function(result) {
       expect(result).to.be(false);
       done();
     });
