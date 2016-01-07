@@ -18,7 +18,7 @@ body {
 }
 #save { font-size: 1em; }
 #master.thinking {
-    border-color: #6f5499;
+    /* border-color: #6f5499; */
 }
 #master.correct {
     border-color: #0F0;
@@ -44,7 +44,6 @@ h1 {
     font-weight: normal;
     font-size: 3em;
     background: #6f5499;
-
 }
 #github {color: #999; font-size: 0.5em; position: absolute; bottom: 30px; left: 30px}
 label {

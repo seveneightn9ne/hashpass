@@ -4,6 +4,7 @@
     <title>HashPass</title>
     <script src="vendor/jquery-2.1.4.min.js"></script>
     <script src="vendor/twin-bcrypt.min.js"></script>
+    <script src="vendor/ProgressCircle.min.js"></script>
     <script src="vendor/forge.min.js"></script>
     <script src="vendor/require.2.1.20.js" data-main="main"></script>
     <link rel="stylesheet" href="style.css">
@@ -19,7 +20,9 @@
         <label for="website">Website</label>
         <input type="url" id="website" tabindex="2"><br>
 
-        <label for="password">HashPassword</label>
+        <label for="password">HashPassword
+            <canvas id="intermediate_progress_canvas" width="25" height="25"></canvas>
+        </label>
         <input id="password" type="text" tabindex="3"><br>
 
         <a id="clear" href="#">clear saved master</a><br><br>

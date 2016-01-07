@@ -17,6 +17,38 @@ function make_timer(ms, callback) {
     }
 }
 
+function progress_circle_wrapper($element) {
+    var progress_value = 0;
+
+    var progress_circle = new ProgressCircle({
+        canvas: $element.get(0),
+        minRadius: 0.001,
+        arcWidth: 12
+    });
+
+    progress_circle.addEntry({
+        fillColor: "#777",
+        fillColorComplete: "#fff",
+        progressListener: function() {
+            return progress_value;
+        }
+    });
+
+    // $element.hide();
+
+    return {
+        update: function(p) {
+            progress_value = p;
+            progress_circle.update(p);
+            if (p == 0) {
+                // $element.hide();
+            } else {
+                // $element.show();
+            }
+        }
+    };
+}
+
 // All the application state lives in this object.
 // The outside world interacts by sending actions via the dispatch method.
 // Each event will cause the render function (passed to init) to be called.
@@ -34,6 +66,7 @@ var AppState = {
         this.master_state = "idle";
         this.slug_content = "";
         this.output_content = "";
+        this.intermediate_progress = 0;
 
         // A handle is an object which is assosciated with a particular
         // (in this case active) execution of a task.
@@ -80,7 +113,8 @@ var AppState = {
             this.dispatch({type: "master_check_started"});
             hashpasslib.check_stored(this.master_content, stored_component, function(p) {
                 // Progress function.
-                return local_check_handle === this.check_handle;
+                if (local_check_handle !== this.check_handle) return false;
+                return true;
             }.bind(this),function(result) {
                 // Finish function.
                 if (local_check_handle !== this.check_handle) return;
@@ -101,6 +135,7 @@ var AppState = {
     start_intermediate: function() {
         var local_intermediate_handle = this.intermediate_handle = {};
         this.intermediate = null;
+        this.intermediate_progress = 0;
         if (this.master_content.length == 0) {
             return;
         }
@@ -112,7 +147,10 @@ var AppState = {
             this.dispatch({type: "master_intermediate_started"});
             hashpasslib.make_intermediate(this.master_content, function(p) {
                 // Progress function.
-                return local_intermediate_handle === this.intermediate_handle;
+                if (local_intermediate_handle !== this.intermediate_handle) return false;
+                this.intermediate_progress = p;
+                this.dispatch({type: "progress_update"});
+                return true;
             }.bind(this),function(intermediate) {
                 // Finish function.
                 if (local_intermediate_handle !== this.intermediate_handle) return;
@@ -122,7 +160,7 @@ var AppState = {
                 this.intermediate = intermediate;
                 this.dispatch({type: "master_intermediate_finished"});
             }.bind(this));
-        }.bind(this), 250);
+        }.bind(this), 200);
     },
     stop_intermediate: function() {
         this.intermediate_handle = null;
@@ -136,7 +174,9 @@ var AppState = {
         this.output_content = passwd;
     },
     dispatch: function(action) {
-        console.log(action);
+        if (action.type != "progress_update") {
+            console.log(action);
+        }
 
         switch (action.type) {
         case "master_change":
@@ -154,6 +194,8 @@ var AppState = {
             this.master_state = "correct";
             break;
         case "master_save_finished":
+            break;
+        case "progress_update":
             break;
         case "master_check_started":
             break;
@@ -185,6 +227,7 @@ var AppState = {
             this.master_content = "";
             this.slug_content = "";
             this.output_content = "";
+            this.intermediate_progress = 0;
             break;
         }
 
@@ -197,7 +240,8 @@ var AppState = {
             slug_content: this.slug_content,
             output_content: this.output_content,
             saved_master: localStorage.getItem(LOCAL_MASTER_HASH_KEY),
-            is_master_saving: this.save_handle != null
+            is_master_saving: this.save_handle != null,
+            intermediate_progress: this.intermediate_progress
         }
         this.external_render(state);
     }
@@ -222,6 +266,8 @@ $(document).ready(function() {
     $("#clear").hide();
     $("#master").focus();
 
+    var intermediate_progress_circle = progress_circle_wrapper($("#intermediate_progress_canvas"));
+
     AppState.init(function(state) {
         // Fill text fields.
         ensure_jquery_val($("#master"), state.master_content);
@@ -242,6 +288,13 @@ $(document).ready(function() {
             $("#clear").fadeIn();
         } else {
             $("#clear").fadeOut();
+        }
+
+        // Show intermediate progress only if a slug has been entered.
+        if (state.slug_content.length > 0 && state.intermediate_progress > 0) {
+            intermediate_progress_circle.update(state.intermediate_progress);
+        } else {
+            intermediate_progress_circle.update(0);
         }
     });
 
