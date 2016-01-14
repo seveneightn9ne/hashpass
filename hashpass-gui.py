@@ -8,6 +8,8 @@ from hashpasslib import *
 import hashlib
 import Tkinter
 import tkFont
+import threading
+import time
 
 
 class HashPass(Tkinter.Frame, object):
@@ -18,6 +20,8 @@ class HashPass(Tkinter.Frame, object):
     super(HashPass, self).__init__(parent)
     self.parent = parent
     self.parent.title("HashPass")
+
+    self.clipboard_thread = DelayedClipboardThread()
 
     # Keyboard shortcuts for quit.
     for keys in ["<Control-q>", "<Control-c>", "<Control-d>", "<Control-w>"]:
@@ -62,14 +66,14 @@ class HashPass(Tkinter.Frame, object):
       return
     hashed = make_password(plain, old=True)
     self.label_hash.config(text=hashed)
-    copy_to_clipboard(hashed)
+    self.clipboard_thread.send_to_clipboard_at_some_point(hashed)
     self.label_clipboard.config(text=(
       "Copied to clipboard. "
       "Enter to clear."))
 
   def on_press_enter(self):
     if self.need_master:
-      self.heres_a_master(self.entry_var.get())
+      self.on_submit_master(self.entry_var.get())
     else:
       self.entry_var.set("")
     self.entry_var.set("")
@@ -78,7 +82,7 @@ class HashPass(Tkinter.Frame, object):
     """When a keyboard shortcut to quit is pressed."""
     self.quit()
 
-  def heres_a_master(self, master):
+  def on_submit_master(self, master):
     if self.need_new_master:
       store_master(master)
       self.need_new_master = False
@@ -99,13 +103,30 @@ class HashPass(Tkinter.Frame, object):
         self.entry_var.set("")
 
 
-def copy_to_clipboard(string):
-   """Copy a string the system clipboard."""
-   tk = Tkinter.Tk()
-   tk.withdraw()
-   tk.clipboard_clear()
-   tk.clipboard_append(string)
-   tk.destroy()
+class DelayedClipboardThread(object):
+  def __init__(self):
+    self._event = threading.Event()
+    self._lock = threading.RLock()
+    self._value = None
+
+    self._thread = threading.Thread(target=self._run)
+    self._thread.daemon = True
+    self._thread.start()
+
+  def send_to_clipboard_at_some_point(self, s):
+    with self._lock:
+      self._value = s
+    self._event.set()
+
+  def _run(self):
+    while True:
+      self._event.wait()
+      with self._lock:
+        s = self._value
+        self._event.clear()
+      if s != None:
+        send_to_clipboard(s)
+      time.sleep(0.2)
 
 
 if __name__ == "__main__":

@@ -1,6 +1,8 @@
 #!/usr/bin/env python
+import os
 import os.path
 import errno
+import subprocess
 import alg
 
 MASTER_PW_DIR = os.path.expanduser("~/.config/hashpass/")
@@ -9,6 +11,16 @@ MASTER_PW_PATH = MASTER_PW_DIR + MASTER_PW_FILE
 
 session_master = None
 session_intermediate = None
+
+CLIP_SECONDS = 30
+
+def send_to_clipboard(text):
+    if subprocess.call(["which", "xclip"], stdout=open(os.devnull, 'wb')) == 0:
+        cliptimesh = os.path.abspath(os.path.join(os.path.dirname(__file__), "cliptime.sh"))
+        subprocess.call([cliptimesh, str(CLIP_SECONDS), text])
+    else:
+        import pyperclip
+        pyperclip.copy(text)
 
 def use_master(master_plaintext, use_bcrypt=False):
     global session_master

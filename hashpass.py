@@ -10,12 +10,8 @@ Options:
 from hashpasslib import *
 import pinentry
 
-import os.path, hashlib, getpass, sys
+import getpass, sys
 from docopt import docopt
-import subprocess
-import os
-
-CLIP_SECONDS = 30
 
 def init():
     """ Saves the master password to disk if you haven't already """
@@ -47,14 +43,6 @@ def get_password(use_bcrypt):
         use_master(pw, use_bcrypt)
     except pinentry.PinEntryException:
         return get_password_cli()
-
-def send_to_clipboard(text):
-    if subprocess.call(["which", "xclip"], stdout=open(os.devnull, 'wb')) == 0:
-        cliptimesh = os.path.abspath(os.path.join(os.path.dirname(__file__), "cliptime.sh"))
-        subprocess.call([cliptimesh, str(CLIP_SECONDS), text])
-    else:
-        import pyperclip
-        pyperclip.copy(text)
 
 def cli(arguments):
     """ runs the app with the CLI as the user interface """
