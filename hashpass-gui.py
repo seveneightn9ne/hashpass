@@ -76,7 +76,9 @@ class HashPass(Tkinter.Frame, object):
       self.on_submit_master(self.entry_var.get())
     else:
       self.entry_var.set("")
-    self.entry_var.set("")
+      self.label_hash.config(text="")
+      self.label_clipboard.config(
+          text=("Enter the website name to generate a password."))
 
   def on_kb_quit(self):
     """When a keyboard shortcut to quit is pressed."""
