@@ -1,9 +1,12 @@
 define(function() { // Start of module.
 
-// Salt for generating intermediate. (13 rounds)
-var REUSED_BCRYPT_SALT = "$2y$13$X5A4.IjQghzyTGwc0wgRre";
+// Salt for generating intermediate. (10 rounds)
+// REUSED_BCRYPT_SALT = bcrypt.gensalt(rounds=10)
+// The work factor is so low because phones have to run this too.
+// Uses the 2y prefix compatible with both our js and py libs.
+REUSED_BCRYPT_SALT = "$2y$10$w1dpoPu1duVEV4rnZPAkLe"
 // Rounds to use for storage.
-var STORE_BCRYPT_ROUNDS = 13;
+STORE_BCRYPT_ROUNDS = 13
 
 var LETTERS = "abcdefghjkmnopqrstuvwxyzABCDEFGHJKLMNPQRSTUVWXY";
 var NUMBERS = "3456789";

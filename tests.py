@@ -16,16 +16,17 @@ import hashlib
 class TestHashPassAlg(unittest.TestCase):
     def setUp(self):
         self.intermediates = [
-            "$2y$13$X5A4.IjQghzyTGwc0wgRrebu3hlW/WFyN5GnvrTKvYsJtdsr5DXC6",
-            "$2y$13$X5A4.IjQghzyTGwc0wgRrejiTwszgBLaN3PTew0gRtIrzb5EHsZB2",]
+            "$2y$10$w1dpoPu1duVEV4rnZPAkLe8kxqbSe4xmE4jVqL4IcwVLWluqZNI3G",
+            "$2y$10$w1dpoPu1duVEV4rnZPAkLea0PzJXKXtAHtHZ60MWk6pk1GH1uKpSe",
+        ]
 
     def test_make_intermediate(self):
         self.assertEqual(alg.make_intermediate("1234"),
-          "$2y$13$X5A4.IjQghzyTGwc0wgRrecUMeNiIgapq6zxM07dr3UDDdHUYWLTC")
+            "$2y$10$w1dpoPu1duVEV4rnZPAkLe8kxqbSe4xmE4jVqL4IcwVLWluqZNI3G")
         self.assertEqual(alg.make_intermediate("super secret"),
-          "$2y$13$X5A4.IjQghzyTGwc0wgRrejDmecj5/NNmPPb5ok4tXNuhs/rdP5zy")
+            "$2y$10$w1dpoPu1duVEV4rnZPAkLea0PzJXKXtAHtHZ60MWk6pk1GH1uKpSe")
         self.assertEqual(alg.make_intermediate("blowfish"),
-          "$2y$13$X5A4.IjQghzyTGwc0wgRrezL8JE8j/mpXN/V6YXoldoca002NMb0a")
+            "$2y$10$w1dpoPu1duVEV4rnZPAkLefQ9jBvhg/MM6m/oTFbWLBq0R0bhwiVW")
 
     def test_make_intermediate_too_long(self):
         with self.assertRaises(Exception):
@@ -72,18 +73,21 @@ class TestHashPassAlg(unittest.TestCase):
 
     def test_make_site_password(self):
         # 0 rerolls.
-        self._test_site(0, self.intermediates[0], "ping0", "yAhnTfcJd#g3UpB7p3Fa")
-        self._test_site(0, self.intermediates[1], "ping0", "Rsgdca3E9E(7KU=JMY3o")
+        self._test_site(0, self.intermediates[0], "rhythm0", "V=tT8TuMj4YRa3=6}K(J")
+        self._test_site(0, self.intermediates[1], "rhythm0", "@v*Y@?))NAHA+H)8@K(B")
+
         # 1 reroll.
-        self._test_site(1, self.intermediates[0], "ping6", "s*t}?z8xzAAWd3#LSAcS")
-        self._test_site(1, self.intermediates[1], "ping2", "5E)@{TRxkS=+WT=}N4sT")
+        self._test_site(1, self.intermediates[0], "rhythm1", "Y)@5Q{KSVtLs{zyYpC8U")
+        self._test_site(1, self.intermediates[1], "rhythm5", "6ufX@obn4KAoeJWWn*(z")
 
     def test_make_site_password_more(self):
         # Higher reroll counts.
-        self._test_site(3, self.intermediates[0], "ping11", "m=vTw7@JhaYGmsF8p9qN")
-        self._test_site(4, self.intermediates[0], "ping7956", "dEVK@9L@XQ?gr{59(pv?")
-        self._test_site(6, self.intermediates[0], "ping166039", "HppQ3vP6ba)wLeG?YUBN")
-        self._test_site(6, self.intermediates[0], "ping343496", "jGL+qAXTF4XG9fe39n=@")
+        self._test_site(2, self.intermediates[0], "rhythm151", "qcNq}+?KtdXL8*bawUda")
+        self._test_site(3, self.intermediates[0], "rhythm354", "sRnjUBA36zV#MDAA=gMc")
+        self._test_site(4, self.intermediates[0], "rhythm2435", "mdp5@sUT}9bBhjgE6RE7")
+        self._test_site(5, self.intermediates[0], "rhythm30362", "?wn7SQytbo@v*+Q*sm#3")
+        self._test_site(6, self.intermediates[0], "rhythm353402", "k@4J*sQ}YpY)bFNw53Fz")
+
 
 class TestHashPassAlgOld(unittest.TestCase):
     def _test_site(self, rerolls, master, slug, result):
@@ -135,13 +139,16 @@ class TestHashPassAlgOld(unittest.TestCase):
 if __name__ == "__main__":
     arguments = docopt(__doc__, version="1.0")
     if arguments["--find"]:
-        intermediate = "$2y$13$X5A4.IjQghzyTGwc0wgRrebu3hlW/WFyN5GnvrTKvYsJtdsr5DXC6"
+        intermediates = [
+            "$2y$10$w1dpoPu1duVEV4rnZPAkLe8kxqbSe4xmE4jVqL4IcwVLWluqZNI3G",
+            "$2y$10$w1dpoPu1duVEV4rnZPAkLea0PzJXKXtAHtHZ60MWk6pk1GH1uKpSe",]
+        intermediate = intermediates[0]
         print "intermediate", intermediate
         seed = arguments["<seed>"]
         rerolls = int(arguments["<rerolls>"])
-        count = int(arguments["<count>"]) or 1
+        count = int(arguments["<count>"] or 1)
         found = 0
-        for i in xrange(1000000):
+        for i in xrange(10000000):
             if found >= count:
                 sys.exit(0)
             slug = seed + str(i)

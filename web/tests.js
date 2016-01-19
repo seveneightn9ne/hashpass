@@ -7,8 +7,9 @@ mocha.run();
 suite("HashPassAlg", function() {
   setup(function() {
     this.intermediates = [
-      "$2y$13$X5A4.IjQghzyTGwc0wgRrebu3hlW/WFyN5GnvrTKvYsJtdsr5DXC6",
-      "$2y$13$X5A4.IjQghzyTGwc0wgRrejiTwszgBLaN3PTew0gRtIrzb5EHsZB2"];
+      "$2y$10$w1dpoPu1duVEV4rnZPAkLe8kxqbSe4xmE4jVqL4IcwVLWluqZNI3G",
+      "$2y$10$w1dpoPu1duVEV4rnZPAkLea0PzJXKXtAHtHZ60MWk6pk1GH1uKpSe"
+    ];
 
     this._test_site = function(rerolls, intermediate, slug, expected) {
       // Test one site password, ignores the reroll parameter.
@@ -28,21 +29,21 @@ suite("HashPassAlg", function() {
   test("make_intermediate", function(done) {
     this.timeout(SLOW_LIMIT);
     hashpasslib.make_intermediate("1234", function(){}, function(result) {
-      expect(result).to.equal("$2y$13$X5A4.IjQghzyTGwc0wgRrecUMeNiIgapq6zxM07dr3UDDdHUYWLTC");
+      expect(result).to.equal("$2y$10$w1dpoPu1duVEV4rnZPAkLe8kxqbSe4xmE4jVqL4IcwVLWluqZNI3G");
       done();
     });
   });
   test("make_intermediate", function(done) {
     this.timeout(SLOW_LIMIT);
     hashpasslib.make_intermediate("super secret", function(){}, function(result) {
-      expect(result).to.equal("$2y$13$X5A4.IjQghzyTGwc0wgRrejDmecj5/NNmPPb5ok4tXNuhs/rdP5zy");
+      expect(result).to.equal("$2y$10$w1dpoPu1duVEV4rnZPAkLea0PzJXKXtAHtHZ60MWk6pk1GH1uKpSe");
       done();
     });
   });
   test("make_intermediate", function(done) {
     this.timeout(SLOW_LIMIT);
     hashpasslib.make_intermediate("blowfish", function(){}, function(result) {
-      expect(result).to.equal("$2y$13$X5A4.IjQghzyTGwc0wgRrezL8JE8j/mpXN/V6YXoldoca002NMb0a");
+      expect(result).to.equal("$2y$10$w1dpoPu1duVEV4rnZPAkLefQ9jBvhg/MM6m/oTFbWLBq0R0bhwiVW");
       done();
     });
   });
@@ -113,21 +114,23 @@ suite("HashPassAlg", function() {
     expect(out.data[0].charCodeAt(0)).to.equal(91);
   });
 
-
   test("make_site_password with 0 and 1 rerolls", function() {
     // 0 rerolls.
-    this._test_site(0, this.intermediates[0], "ping0", "yAhnTfcJd#g3UpB7p3Fa");
-    this._test_site(0, this.intermediates[1], "ping0", "Rsgdca3E9E(7KU=JMY3o");
+    this._test_site(0, this.intermediates[0], "rhythm0", "V=tT8TuMj4YRa3=6}K(J")
+    this._test_site(0, this.intermediates[1], "rhythm0", "@v*Y@?))NAHA+H)8@K(B")
+
     // 1 reroll.
-    this._test_site(1, this.intermediates[0], "ping6", "s*t}?z8xzAAWd3#LSAcS");
-    this._test_site(1, this.intermediates[1], "ping2", "5E)@{TRxkS=+WT=}N4sT");
+    this._test_site(1, this.intermediates[0], "rhythm1", "Y)@5Q{KSVtLs{zyYpC8U")
+    this._test_site(1, this.intermediates[1], "rhythm5", "6ufX@obn4KAoeJWWn*(z")
   });
 
   test("make_site_password with more rerolls", function() {
-    this._test_site(3, this.intermediates[0], "ping11", "m=vTw7@JhaYGmsF8p9qN");
-    this._test_site(4, this.intermediates[0], "ping7956", "dEVK@9L@XQ?gr{59(pv?");
-    this._test_site(6, this.intermediates[0], "ping166039", "HppQ3vP6ba)wLeG?YUBN");
-    this._test_site(6, this.intermediates[0], "ping343496", "jGL+qAXTF4XG9fe39n=@");
+    // Higher reroll counts.
+    this._test_site(2, this.intermediates[0], "rhythm151", "qcNq}+?KtdXL8*bawUda")
+    this._test_site(3, this.intermediates[0], "rhythm354", "sRnjUBA36zV#MDAA=gMc")
+    this._test_site(4, this.intermediates[0], "rhythm2435", "mdp5@sUT}9bBhjgE6RE7")
+    this._test_site(5, this.intermediates[0], "rhythm30362", "?wn7SQytbo@v*+Q*sm#3")
+    this._test_site(6, this.intermediates[0], "rhythm353402", "k@4J*sQ}YpY)bFNw53Fz")
   });
 });
 
