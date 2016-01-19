@@ -2,6 +2,8 @@
 <html>
 <head>
     <title>HashPass</title>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
     <script src="vendor/jquery-2.1.4.min.js"></script>
     <script src="vendor/twin-bcrypt.min.js"></script>
     <script src="vendor/ProgressCircle.min.js"></script>
@@ -20,12 +22,12 @@
         <input type="password" id="master" tabindex="1">
 
         <label for="website">Website</label>
-        <input type="url" id="website" tabindex="2"><br>
+        <input type="url" id="website" tabindex="2">
 
         <label for="password">HashPassword
-            <canvas id="intermediate_progress_canvas" width="25" height="25"></canvas>
+            <canvas id="intermediate_progress_canvas" width="15" height="15"></canvas>
         </label>
-        <input id="password" type="text" tabindex="3"><br>
+        <input id="password" type="text" tabindex="3">
     </div>
     <a href="http://github.com/seveneightn9ne/hashpass" id="github">hashpass on github</a>
 </body>
