@@ -63,7 +63,7 @@ def make_site_password_new(secret_intermediate, slug, out_extra=False):
     4. Try again with counter++ if candidate does not satisfy constraints.
 
     Args:
-        out_ctr: Whether to output a tuple of (generation, counter, result)
+        out_extra: Whether to output a tuple of (generation, counter, result).
     """
     limit = 10000
     generation = 0 # can be used for future features.
