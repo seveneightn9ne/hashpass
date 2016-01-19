@@ -13,10 +13,7 @@ var NUMBERS = "3456789";
 var SYMBOLS = "#*@()+={}?";
 
 var make_intermediate = function(secret_master, cb_progress, cb_success) {
-  if (secret_master.length > 72) {
-    console.error("Bcrypt does not support passwords longer than 72 bytes.");
-    throw new Error("Bcrypt limit exceeded.");
-  }
+  _check_bcrypt_input(secret_master);
   TwinBcrypt.hash(secret_master, REUSED_BCRYPT_SALT, cb_progress, cb_success)
 };
 
@@ -66,18 +63,12 @@ var is_good_pass = function(password) {
 };
 
 var make_storeable = function(secret_master, cb_progress, cb_success) {
-  if (secret_master.length > 72) {
-    console.error("Bcrypt does not support passwords longer than 72 bytes.");
-    throw new Error("Bcrypt limit exceeded.");
-  }
+  _check_bcrypt_input(secret_master);
   TwinBcrypt.hash(secret_master, TwinBcrypt.genSalt(STORE_BCRYPT_ROUNDS), cb_progress, cb_success)
 }
 
 var check_stored = function(secret_master, stored_component, cb_progress, cb_success) {
-  if (secret_master.length > 72) {
-    console.error("Bcrypt does not support passwords longer than 72 bytes.");
-    throw new Error("Bcrypt limit exceeded.");
-  }
+  _check_bcrypt_input(secret_master);
   try {
     TwinBcrypt.compare(secret_master, stored_component, cb_progress, cb_success);
   } catch (e) {
@@ -128,6 +119,14 @@ var _hash = function(secret, data) {
       return a + b
   });
 };
+
+
+function _check_bcrypt_input(x) {
+  if (x.length > 72) {
+    console.error("Bcrypt does not support passwords longer than 72 bytes.");
+    throw new Error("Bcrypt limit exceeded.");
+  }
+}
 
 // Export from module.
 return {
