@@ -3,7 +3,6 @@ require(["./hashpasslib", "./whiplash"], function(hashpasslib, whiplash) { // St
 var LOCAL_MASTER_HASH_KEY = "master_hash";
 
 function make_timer(ms, callback) {
-    // TODO(miles): fix this. it's broken.
     var id = null;
 
     return {
