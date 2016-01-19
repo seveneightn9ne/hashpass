@@ -62,6 +62,7 @@ label {
     letter-spacing: 1.4;
     font-weight: normal;
     background: #700;
+    display: none;
 }
 .strike {
     text-decoration: line-through;

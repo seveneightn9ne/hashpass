@@ -269,8 +269,9 @@ function ensure_jquery_val($element, val) {
 $(document).ready(function() {
     // Security warning.
     if (location.protocol === 'https:' || location.protocol === "file:") {
-        $(".insecure-warning").hide();
+        // All good.
     } else {
+        $(".insecure-warning").show();
         console.warn("Insecure connection, please use https.");
         $("#main-title").addClass("strike");
     }
