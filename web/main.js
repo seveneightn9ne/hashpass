@@ -65,6 +65,8 @@ var AppState = {
         this.master_state = "idle";
         this.slug_content = "";
         this.output_content = "";
+        // Focus is special. It is cleared after setting by the consumer of the store.
+        this.focus = "master";
         this.intermediate_progress = 0;
 
         // A handle is an object which is assosciated with a particular
@@ -77,6 +79,9 @@ var AppState = {
         this.intermediate = null;
 
         this.render();
+    },
+    ack_focus: function() {
+        this.focus = null;
     },
     start_save: function() {
         var local_save_handle = this.save_handle = {};
@@ -212,10 +217,18 @@ var AppState = {
             localStorage.removeItem(LOCAL_MASTER_HASH_KEY);
             this.master_state = "idle";
             break;
+        case "master_return":
+            this.focus = "slug";
+            break;
         case "slug_change":
             this.clearing_timer.bump();
             this.slug_content = action.text;
             this.update_output();
+            break;
+        case "slug_return":
+            this.focus = "output";
+            break;
+        case "output_touched":
             break;
         case "inactivity":
             console.log("Clearing password fields after timeout.");
@@ -238,6 +251,7 @@ var AppState = {
             master_state: this.master_state,
             slug_content: this.slug_content,
             output_content: this.output_content,
+            focus: this.focus,
             saved_master: localStorage.getItem(LOCAL_MASTER_HASH_KEY),
             is_master_saving: this.save_handle != null,
             intermediate_progress: this.intermediate_progress
@@ -273,16 +287,28 @@ $(document).ready(function() {
         ensure_jquery_val($("#website"), state.slug_content);
         ensure_jquery_val($("#password"), state.output_content);
 
+        // Focus and select a textbok.
+        if (state.focus == "master") {
+            $("#master").focus();
+        } else if (state.focus == "slug") {
+            $("#website").focus();
+        } else if (state.focus == "output") {
+            $("#password").select();
+        }
+        AppState.ack_focus();
+
         // Set master coloring.
         $("#master").removeClass("correct incorrect thinking");
         $("#master").addClass(state.master_state);
 
+        // Display save button.
         if (state.master_content.length > 0 && state.saved_master == null && !state.is_master_saving) {
             $("#save").fadeIn();
         } else {
             $("#save").fadeOut();
         }
 
+        // Display clear button.
         if (state.saved_master != null || state.is_master_saving) {
             $("#clear").fadeIn();
         } else {
@@ -304,11 +330,33 @@ $(document).ready(function() {
         })
     });
 
+    $("#master").keyup(function(e) {
+        if(e.keyCode == 13) {
+            AppState.dispatch({type: "master_return"});
+        }
+    });
+
     $("#website").on('input', function() {
         AppState.dispatch({
             type: "slug_change",
             text: $("#website").val()
         })
+    });
+
+    $("#website").keyup(function(e) {
+        if(e.keyCode == 13) {
+            AppState.dispatch({type: "slug_return"});
+        }
+    });
+
+    $("#password").on('input', function() {
+        AppState.dispatch({type: "output_touched"});
+    });
+
+    $("#password").keyup(function(e) {
+        if(e.keyCode == 13) {
+            AppState.dispatch({type: "output_touched"});
+        }
     });
 
     $("#save").click(function() {
