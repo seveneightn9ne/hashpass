@@ -22,7 +22,7 @@ function progress_circle_wrapper($element) {
     var progress_circle = new ProgressCircle({
         canvas: $element.get(0),
         minRadius: 0.001,
-        arcWidth: 12
+        arcWidth: 7
     });
 
     progress_circle.addEntry({
