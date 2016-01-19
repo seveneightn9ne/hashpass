@@ -1,4 +1,0 @@
-# enhancements
-[ ] Clear the password from the clipboard (both UIs)
-[ ] Package and/or bash script to run from web
-[ ] Installer
