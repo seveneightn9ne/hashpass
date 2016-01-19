@@ -218,6 +218,7 @@ var AppState = {
             this.master_state = "idle";
             break;
         case "master_return":
+            this.clearing_timer.bump();
             this.focus = "slug";
             break;
         case "slug_change":
@@ -226,9 +227,11 @@ var AppState = {
             this.update_output();
             break;
         case "slug_return":
+            this.clearing_timer.bump();
             this.focus = "output";
             break;
         case "output_touched":
+            this.clearing_timer.bump();
             break;
         case "inactivity":
             console.log("Clearing password fields after timeout.");
