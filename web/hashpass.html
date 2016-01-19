@@ -14,7 +14,8 @@
     <div class="insecure-warning">Insecure Connection</div>
     <div id="container">
         <label for="master">Master Password
-            <input type="button" id="save" value="Save"><br>
+            <input class="mem-button" type="button" id="save" value="Save">
+            <input class="mem-button" type="button" id="forget" value="Forget">
         </label>
         <input type="password" id="master" tabindex="1">
 
@@ -25,8 +26,6 @@
             <canvas id="intermediate_progress_canvas" width="25" height="25"></canvas>
         </label>
         <input id="password" type="text" tabindex="3"><br>
-
-        <a id="clear" href="#">clear saved master</a><br><br>
     </div>
     <a href="http://github.com/seveneightn9ne/hashpass" id="github">hashpass on github</a>
 </body>
