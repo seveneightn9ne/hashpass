@@ -210,7 +210,7 @@ var AppState = {
         case "master_intermediate_finished":
             this.update_output();
             break;
-        case "master_clear":
+        case "master_forget":
             this.clearing_timer.bump();
             this.stop_save();
             this.stop_check();
@@ -280,7 +280,7 @@ $(document).ready(function() {
     }
 
     $("#save").hide();
-    $("#clear").hide();
+    $("#forget").hide();
     $("#master").focus();
 
     var intermediate_progress_circle = progress_circle_wrapper($("#intermediate_progress_canvas"));
@@ -309,14 +309,14 @@ $(document).ready(function() {
         if (state.master_content.length > 0 && state.saved_master == null && !state.is_master_saving) {
             $("#save").fadeIn();
         } else {
-            $("#save").fadeOut();
+            $("#save").hide();
         }
 
-        // Display clear button.
+        // Display forget button.
         if (state.saved_master != null || state.is_master_saving) {
-            $("#clear").fadeIn();
+            $("#forget").fadeIn();
         } else {
-            $("#clear").fadeOut();
+            $("#forget").hide();
         }
 
         // Show intermediate progress only if a slug has been entered.
@@ -367,8 +367,8 @@ $(document).ready(function() {
         AppState.dispatch({type: "master_save"});
     });
 
-    $("#clear").click(function() {
-        AppState.dispatch({type: "master_clear"});
+    $("#forget").click(function() {
+        AppState.dispatch({type: "master_forget"});
     });
 });
 
