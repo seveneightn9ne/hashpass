@@ -3,7 +3,7 @@
 A GUI Utility for generating deterministic passwords.
 """
 
-from hashpasslib import *
+import hashpasslib
 
 import hashlib
 import Tkinter
@@ -46,7 +46,7 @@ class HashPass(Tkinter.Frame, object):
         font=self.font_mono)
     self.label_hash.grid(sticky=Tkinter.W)
 
-    self.need_new_master = read_stored_master() == None
+    self.need_new_master = hashpasslib.read_stored_master() == None
     self.need_master = True
 
     label_clipboard_text = "Enter a master password.\n" + \
@@ -64,7 +64,7 @@ class HashPass(Tkinter.Frame, object):
     plain = self.entry_var.get()
     if len(plain) == 0 or self.need_master:
       return
-    hashed = make_password(plain, old=True)
+    hashed = hashpasslib.make_password(plain, old=True)
     self.label_hash.config(text=hashed)
     self.clipboard_thread.send_to_clipboard_at_some_point(hashed)
     self.label_clipboard.config(text=(
@@ -86,12 +86,12 @@ class HashPass(Tkinter.Frame, object):
 
   def on_submit_master(self, master):
     if self.need_new_master:
-      store_master(master)
+      hashpasslib.store_master(master)
       self.need_new_master = False
       self.label_clipboard.config(text=("Enter the password again."))
     elif self.need_master:
-      if is_correct_master(master):
-        use_master(master, use_bcrypt=False)
+      if hashpasslib.is_correct_master(master):
+        hashpasslib.use_master(master, use_bcrypt=False)
         self.label_clipboard.config(
             text=("Enter the website name to generate a password."))
         # Clear the password.
@@ -127,7 +127,7 @@ class DelayedClipboardThread(object):
         s = self._value
         self._event.clear()
       if s != None:
-        send_to_clipboard(s)
+        hashpasslib.send_to_clipboard(s)
       time.sleep(0.2)
 
 

@@ -13,36 +13,36 @@ import os
 from docopt import docopt
 import pinentry
 import getpass
-from hashpasslib import *
+import hashpasslib
 
 def init():
     """ Saves the master password to disk if you haven't already """
-    if not read_stored_master():
+    if not hashpasslib.read_stored_master():
         secret_master = getpass.getpass("No master password found. Enter one now: ")
-        store_master(secret_master)
+        hashpasslib.store_master(secret_master)
         print "Your master password will be hashed and saved at " + MASTER_PW_PATH
 
 def get_password_cli(use_bcrypt):
     """ Gets the password via CLI and makes sure it matches the stored password """
     pw = getpass.getpass("Enter master password: ")
-    while not is_correct_master(pw):
+    while not hashpasslib.is_correct_master(pw):
         print "That doesn't match the stored master."
         pw = getpass.getpass("Try again: ")
-    use_master(pw, use_bcrypt)
+    hashpasslib.use_master(pw, use_bcrypt)
 
 def get_password(use_bcrypt):
     """ Gets the password via pinentry if possible. Fallback to CLI. """
     try:
         pw = pinentry.get_pin(description="Enter hashpass master password:",
                               prompt="Password:")
-        while pw is None or not is_correct_master(pw):
+        while pw is None or not hashpasslib.is_correct_master(pw):
             if pw == None:
                 print "Bye."
                 sys.exit(0)
             pw = pinentry.get_pin(description="Enter hashpass master password:",
                                   prompt="Password:",
                                   errormsg="That doesn't match the stored master.")
-        use_master(pw, use_bcrypt)
+        hashpasslib.use_master(pw, use_bcrypt)
     except pinentry.PinEntryException:
         return get_password_cli()
 
@@ -54,11 +54,11 @@ def cli(arguments):
     get_password(use_bcrypt)
     if arguments['<website>']:
         w = arguments['<website>']
-        result = make_password(w, old=(not use_bcrypt))
+        result = hashpasslib.make_password(w, old=(not use_bcrypt))
         if arguments['--show']:
             print result
         else:
-            send_to_clipboard(result)
+            hashpasslib.send_to_clipboard(result)
             print "The password is in your clipboard."
     else:
         while True:
@@ -69,11 +69,11 @@ def cli(arguments):
                 return
             if w == "":
                 return
-            result = make_password(w, old=(not use_bcrypt))
+            result = hashpasslib.make_password(w, old=(not use_bcrypt))
             if arguments['--show']:
                 print result
             else:
-                send_to_clipboard(result)
+                hashpasslib.send_to_clipboard(result)
                 print "The password is in your clipboard."
 
 if __name__ == "__main__":
