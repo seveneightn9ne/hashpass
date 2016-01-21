@@ -4,6 +4,7 @@ Usage: hashpass [options] [<website>]
 
 Options:
     -g --gui     Start the GUI. (ignores all other options)
+    -a --agent   Start the agent daemon. (ignores all other options)
     -s --show    Display the site password instead of putting it in the clipboard
     -b --bcrypt  Use bcrypt as the hashing algorithm [Default]
     --sha        Use sha256 as the hashing algorithm [Old, flawed]
@@ -80,6 +81,9 @@ if __name__ == "__main__":
     arguments = docopt(__doc__, version='HashPass 1.0')
     if arguments["--gui"]:
         os.execl("./hashpass-gui.py", *sys.argv)
+        sys.exit(-1)
+    if arguments["--agent"]:
+        os.execl("./agent.py", *sys.argv)
         sys.exit(-1)
     else:
         cli(arguments)

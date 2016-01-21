@@ -31,6 +31,10 @@ def use_master(master_plaintext, use_bcrypt=False):
     else:
         session_intermediate = session_master
 
+def is_ready():
+    """Return whether there is a master/intermediate stored."""
+    return (session_master != None) or (session_intermediate != None)
+
 def read_stored_master():
     """
     Gets the stored component of the master saved on disk at MASTER_PW_PATH.
