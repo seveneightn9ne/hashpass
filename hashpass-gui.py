@@ -64,7 +64,7 @@ class HashPass(Tkinter.Frame, object):
     plain = self.entry_var.get()
     if len(plain) == 0 or self.need_master:
       return
-    hashed = hashpasslib.make_password(plain, old=True)
+    hashed = hashpasslib.make_password(plain, old=False)
     self.label_hash.config(text=hashed)
     self.clipboard_thread.send_to_clipboard_at_some_point(hashed)
     self.label_clipboard.config(text=(
