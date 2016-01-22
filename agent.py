@@ -195,6 +195,7 @@ def get_master_gui(use_bcrypt):
         hashpasslib.use_master(pw, use_bcrypt)
     except pinentry.PinEntryException:
         logging.critical("Cannot use pinentry.")
+        sys.exit(-1)
         return None
 
 

@@ -59,10 +59,10 @@ def get_password(use_bcrypt):
     except pinentry.PinEntryException:
         return get_password_cli(use_bcrypt)
 
-def make_password_maybe_agent(website, old):
+def make_password_maybe_agent(website, use_bcrypt):
     """Get a password from the agent falling back to hashpasslib."""
     # Agent does not support old.
-    if not old:
+    if use_bcrypt:
         try:
             result = agent_client.get_password(website)
             return result
@@ -70,7 +70,9 @@ def make_password_maybe_agent(website, old):
             pass
 
     # Fallback to generating using hashpasslib directly.
-    result = hashpasslib.make_password(website, old)
+    if not hashpasslib.is_ready():
+        get_password(use_bcrypt)
+    result = hashpasslib.make_password(website, old=(not use_bcrypt))
     return result
 
 def present_password(password, show):
@@ -94,7 +96,7 @@ def cli(arguments):
         get_password(use_bcrypt)
 
     if website:
-        result = make_password_maybe_agent(website, old=(not use_bcrypt))
+        result = make_password_maybe_agent(website, use_bcrypt=use_bcrypt)
         present_password(result, show_result)
     else:
         while True:
@@ -105,7 +107,7 @@ def cli(arguments):
                 return
             if website == "":
                 return
-            result = make_password_maybe_agent(website, old=(not use_bcrypt))
+            result = make_password_maybe_agent(website, use_bcrypt=use_bcrypt)
             present_password(result, show_result)
 
 if __name__ == "__main__":
