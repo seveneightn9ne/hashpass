@@ -19,15 +19,24 @@ class AgentClientException(Exception):
     pass
 
 
+def is_alive():
+    """Whether the agent is alive."""
+    try:
+        return ping() is not None
+    except AgentClientException:
+        return False
+
+
 def ping():
     return _send_object({"type": "ping"})
 
 
 def get_password(slug):
-    print _send_object({
+    res = _send_object({
         "type": "get_password",
         "slug": slug,
     })
+    return str(res["password"])
 
 
 def send_shutdown():
