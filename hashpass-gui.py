@@ -91,7 +91,7 @@ class HashPass(Tkinter.Frame, object):
       self.label_clipboard.config(text=("Enter the password again."))
     elif self.need_master:
       if hashpasslib.is_correct_master(master):
-        hashpasslib.use_master(master, use_bcrypt=False)
+        hashpasslib.use_master(master, use_bcrypt=True)
         self.label_clipboard.config(
             text=("Enter the website name to generate a password."))
         # Clear the password.
