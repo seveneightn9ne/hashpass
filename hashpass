@@ -19,8 +19,8 @@ def init():
     """ Saves the master password to disk if you haven't already """
     if not hashpasslib.read_stored_master():
         secret_master = getpass.getpass("No master password found. Enter one now: ")
+        print "Your master password will be hashed and saved at " + hashpasslib.MASTER_PW_PATH
         hashpasslib.store_master(secret_master)
-        print "Your master password will be hashed and saved at " + MASTER_PW_PATH
 
 def get_password_cli(use_bcrypt):
     """ Gets the password via CLI and makes sure it matches the stored password """
