@@ -103,76 +103,80 @@ def make_server_socket(path):
     return sock
 
 
-def agent_main():
-    logging.info("Agent started.")
+class _Agent(object):
+    def __init__(self):
+        self.canceled = False
 
-    server_sock = make_server_socket(daemon_sock_path())
-    running = True
+        self._run()
 
-    while running:
-        sock, addr = server_sock.accept()
-        logging.debug("Connection from {}".format(addr))
-        req = sock.recv(4096)
-        logging.debug("Received: {}".format(req))
-        try:
-            req = json.loads(req)
-        except ValueError as exc:
-            logging.debug("Received invalid json.")
-            continue
-        res, running = process_message(req)
-        if res == None:
+    def _run(self):
+        logging.info("Agent started.")
+
+        server_sock = make_server_socket(daemon_sock_path())
+        self.canceled = False
+
+        while not self.canceled:
+            sock, addr = server_sock.accept()
+            logging.debug("Connection from '{}'".format(addr))
+            req = sock.recv(4096)
+            logging.debug("Received: {}".format(req))
+            try:
+                req = json.loads(req)
+            except ValueError as exc:
+                logging.debug("Received invalid json.")
+                continue
+            res = self.process_message(req)
+            if res == None:
+                sock.close()
+                continue
+            res = json.dumps(res)
+            try:
+                sock.sendall(res)
+            except socket.error as exc:
+                if (isinstance(exc.args, tuple) and
+                    exc.args[0] == errno.EPIPE):
+                    logging.warn("Client left before being sent response.")
+                else:
+                    raise
             sock.close()
-            continue
-        res = json.dumps(res)
-        try:
-            sock.sendall(res)
-        except socket.error as exc:
-            if (isinstance(exc.args, tuple) and
-                exc.args[0] == errno.EPIPE):
-                logging.warn("Client left before being sent response.")
+
+        logging.info("Shutting down by request.")
+        sys.exit(0)
+
+    def process_message(self, message):
+        """Process a json message.
+
+        This does user interaction and could block for a long time.
+
+        Returns: Response to return to client.
+        """
+        if not isinstance(message, dict):
+            return None
+        mtype = message.get("type", None)
+        if mtype == None:
+            return None
+
+        if mtype == "ping":
+            return {"pong": "pong"}
+        if mtype == "get_password":
+            slug = message.get("slug", None)
+            if slug == None:
+                return None
+
+            # Try once to get a master.
+            if not hashpasslib.is_ready():
+                get_master_gui(use_bcrypt=True)
+            if hashpasslib.is_ready():
+                password = hashpasslib.make_password(slug, old=False)
+                return {"password": password}
             else:
-                raise
-        sock.close()
+                return {"error": "no master"}
+        if mtype == "shutdown":
+            self.canceled = True
+            return {"ok": "ok"}
 
-    logging.info("Shutting down by request.")
-    sys.exit(0)
-
-
-def process_message(message):
-    """Process a json message.
-
-    This does user interaction and could block for a long time.
-
-    Returns:
-        A tuple of (res, alive)
-        Where alive is whether to continue running.
-    """
-    if not isinstance(message, dict):
-        return (None, True)
-    mtype = message.get("type", None)
-    if mtype == None:
-        return (None, True)
-
-    if mtype == "ping":
-        return ({"pong": "pong"}, True)
-    if mtype == "get_password":
-        slug = message.get("slug", None)
-        if slug == None:
-            return (None, True)
-
-        # Try once to get a master.
-        if not hashpasslib.is_ready():
-            get_master_gui(use_bcrypt=True)
-        if hashpasslib.is_ready():
-            password = hashpasslib.make_password(slug, old=False)
-            return ({"password": password}, True)
-        else:
-            return ({"error": "no master"}, True)
-    if mtype == "shutdown":
-        return ({"ok": "ok"}, False)
-
-    # Unrecognized message type.
-    return (None, True)
+        # Unrecognized message type.
+        return None
 
 
 def get_master_gui(use_bcrypt):
@@ -215,7 +219,7 @@ if __name__ == "__main__":
         try:
             # Acquire the lock inside the daemon so the fd stays open.
             with ipc_lock_nonblock(process_lock):
-                agent_main()
+                a = _Agent()
 
         except AgentLockException:
             logging.info("Aborting, could not acquire lock.")

@@ -31,6 +31,12 @@ def use_master(master_plaintext, use_bcrypt=False):
     else:
         session_intermediate = session_master
 
+def forget_master():
+    global session_master
+    global session_intermediate
+    session_master = None
+    session_intermediate = None
+
 def is_ready():
     """Return whether there is a master/intermediate stored."""
     return (session_master != None) or (session_intermediate != None)
