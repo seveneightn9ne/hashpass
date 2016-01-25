@@ -8,6 +8,8 @@ import os
 import os.path
 import errno
 import socket
+import time
+import datetime
 import json
 import contextlib
 import logging
@@ -17,11 +19,14 @@ import daemon
 import pinentry
 import hashpasslib
 
-
 # Set up logging.
 logging.basicConfig(filename="./agent.log", level=logging.DEBUG)
 # TODO(miles): disable logging?
 # logging.getLogger().disabled = True
+
+
+# Credential lifetime in seconds.
+CREDENTIALS_LIFETIME = datetime.timedelta(hours=12).total_seconds()
 
 
 class AgentLockException(Exception):
@@ -106,6 +111,7 @@ def make_server_socket(path):
 class _Agent(object):
     def __init__(self):
         self.canceled = False
+        self.last_auth = time.time()
 
         self._run()
 
@@ -153,6 +159,9 @@ class _Agent(object):
         if not isinstance(message, dict):
             return None
         mtype = message.get("type", None)
+
+        self.maybe_expire_credentials()
+
         if mtype == None:
             return None
 
@@ -166,6 +175,8 @@ class _Agent(object):
             # Try once to get a master.
             if not hashpasslib.is_ready():
                 get_master_gui(use_bcrypt=True)
+                if hashpasslib.is_ready():
+                    self.last_auth = time.time()
             if hashpasslib.is_ready():
                 password = hashpasslib.make_password(slug, old=False)
                 return {"password": password}
@@ -177,6 +188,14 @@ class _Agent(object):
 
         # Unrecognized message type.
         return None
+
+    def maybe_expire_credentials(self):
+        """Expire credentials if it has been too long."""
+        time_since_last_auth = time.time() - self.last_auth
+        logging.debug("Time since last auth {}.".format(time_since_last_auth))
+        if time_since_last_auth > CREDENTIALS_LIFETIME:
+            logging.info("Expiring credentials.")
+            hashpasslib.forget_master()
 
 
 def get_master_gui(use_bcrypt):
