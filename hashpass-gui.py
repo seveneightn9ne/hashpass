@@ -46,23 +46,43 @@ class HashPass(Tkinter.Frame, object):
         font=self.font_mono)
     self.label_hash.grid(sticky=Tkinter.W)
 
-    self.need_new_master = hashpasslib.read_stored_master() == None
-    self.need_master = True
-
-    label_clipboard_text = "Enter a master password.\n" + \
-        "It will be bcrypted and saved to disk." if self.need_new_master \
-        else "Enter your master password."
-
     self.label_clipboard = Tkinter.Label(self,
-        text=label_clipboard_text,
+        text="",
         font=self.font_mono)
     self.label_clipboard.grid(sticky=Tkinter.W)
 
+    self.ask_for_master()
+
     self.pack()
 
+  def ask_for_master(self, message=None):
+    print "asked"
+    if message == None:
+        if hashpasslib.read_stored_master() == None:
+            message = "Enter a master password.\nIt will be bcrypted and saved to disk."
+            self.no_saved_master = True
+        else:
+            message = "Enter your master password."
+            self.no_saved_master = False
+    self.asked_for_master = True #Unset by pressing enter
+    self.clear_textbox()
+    self.label_clipboard.config(text=(message))
+
+  def ask_for_website(self):
+    self.clear_textbox()
+    self.entry.config(show="")
+    self.label_clipboard.config(text=("Enter the website name to generate a password."))
+
+  def clear_textbox(self):
+    self.entry_var.set("")
+
   def on_change_entry(self):
+    print "onchange"
+    if self.asked_for_master:
+      return
     plain = self.entry_var.get()
-    if len(plain) == 0 or self.need_master:
+    if len(plain) == 0:
+      self.label_hash.config(text="")
       return
     hashed = hashpasslib.make_password(plain, old=False)
     self.label_hash.config(text=hashed)
@@ -72,37 +92,29 @@ class HashPass(Tkinter.Frame, object):
       "Enter to clear."))
 
   def on_press_enter(self):
-    if self.need_master:
+    print "enter"
+    if self.asked_for_master:
       self.on_submit_master(self.entry_var.get())
     else:
-      self.entry_var.set("")
-      self.label_hash.config(text="")
-      self.label_clipboard.config(
-          text=("Enter the website name to generate a password."))
+      self.ask_for_website()
 
   def on_kb_quit(self):
     """When a keyboard shortcut to quit is pressed."""
     self.quit()
 
   def on_submit_master(self, master):
-    if self.need_new_master:
+    print "submit master"
+    self.asked_for_master = False
+    if self.no_saved_master:
       hashpasslib.store_master(master)
-      self.need_new_master = False
-      self.label_clipboard.config(text=("Enter the password again."))
-    elif self.need_master:
+      self.no_saved_master = False
+      self.ask_for_master("Enter the password again.")
+    else:
       if hashpasslib.is_correct_master(master):
         hashpasslib.use_master(master, use_bcrypt=True)
-        self.label_clipboard.config(
-            text=("Enter the website name to generate a password."))
-        # Clear the password.
-        self.entry_var.set("")
-        # Disable password hiding.
-        self.entry.config(show="")
-        self.need_master = False
+        self.ask_for_website()
       else:
-        self.label_clipboard.config(text=(
-            "That didn't match your saved master. "))
-        self.entry_var.set("")
+        self.ask_for_master("That didn't match your saved master. ")
 
 
 class DelayedClipboardThread(object):
