@@ -4,6 +4,8 @@ Usage: hashpass [options] [<website>]
 
 Options:
     -g --gui     Start the GUI. (ignores all other options)
+    -a --agent   Start the agent daemon. (ignores all other options)
+    -k --kill    Shutdown the agent daemon. (ignores all other options)
     -s --show    Display the site password instead of putting it in the clipboard
     -b --bcrypt  Use bcrypt as the hashing algorithm [Default]
     --sha        Use sha256 as the hashing algorithm [Old, flawed]
@@ -14,8 +16,9 @@ from docopt import docopt
 import pinentry
 import getpass
 import hashpasslib
+import agent_client
 
-def init():
+def first_run():
     """ Saves the master password to disk if you haven't already """
     if not hashpasslib.read_stored_master():
         secret_master = getpass.getpass("No master password found. Enter one now: ")
@@ -26,12 +29,22 @@ def get_password_cli(use_bcrypt):
     """ Gets the password via CLI and makes sure it matches the stored password """
     pw = getpass.getpass("Enter master password: ")
     while not hashpasslib.is_correct_master(pw):
+        if pw == "":
+            print "Bye."
+            sys.exit(0)
         print "That doesn't match the stored master."
         pw = getpass.getpass("Try again: ")
     hashpasslib.use_master(pw, use_bcrypt)
 
 def get_password(use_bcrypt):
-    """ Gets the password via pinentry if possible. Fallback to CLI. """
+    """Gets the password from the user.
+
+    Gets the password via pinentry if possible.
+    Fallback to CLI.
+    Stores the password using use_master.
+
+    Returns: None
+    """
     try:
         pw = pinentry.get_pin(description="Enter hashpass master password:",
                               prompt="Password:")
@@ -44,42 +57,78 @@ def get_password(use_bcrypt):
                                   errormsg="That doesn't match the stored master.")
         hashpasslib.use_master(pw, use_bcrypt)
     except pinentry.PinEntryException:
-        return get_password_cli()
+        return get_password_cli(use_bcrypt)
+
+def make_password_maybe_agent(website, use_bcrypt):
+    """Get a password from the agent falling back to hashpasslib."""
+    # Agent does not support old.
+    if use_bcrypt:
+        try:
+            result = agent_client.get_password(website)
+            return result
+        except agent_client.AgentClientException:
+            pass
+
+    # Fallback to generating using hashpasslib directly.
+    if not hashpasslib.is_ready():
+        get_password(use_bcrypt)
+    result = hashpasslib.make_password(website, old=(not use_bcrypt))
+    return result
+
+def present_password(password, show):
+    if show:
+        print password
+        hashpasslib.send_to_clipboard(password)
+    else:
+        hashpasslib.send_to_clipboard(password)
+        print "The password is in your clipboard."
 
 def cli(arguments):
     """ Runs the app with the CLI as the user interface. """
-    use_bcrypt = not arguments['--sha']
+    use_bcrypt = not arguments["--sha"]
+    website = arguments["<website>"]
+    show_result = arguments["--show"]
 
-    init()
-    get_password(use_bcrypt)
-    if arguments['<website>']:
-        w = arguments['<website>']
-        result = hashpasslib.make_password(w, old=(not use_bcrypt))
-        if arguments['--show']:
-            print result
-        else:
-            hashpasslib.send_to_clipboard(result)
-            print "The password is in your clipboard."
+    first_run()
+
+    # Ask for a password unless one exists or an agent is running.
+    if not (hashpasslib.is_ready() or agent_client.is_alive()):
+        get_password(use_bcrypt)
+
+    if website:
+        result = make_password_maybe_agent(website, use_bcrypt=use_bcrypt)
+        present_password(result, show_result)
     else:
         while True:
             try:
-                w = raw_input("Website name: ")
+                website = raw_input("Website name: ")
             except (KeyboardInterrupt, EOFError):
                 print ""
                 return
-            if w == "":
+            if website == "":
                 return
-            result = hashpasslib.make_password(w, old=(not use_bcrypt))
-            if arguments['--show']:
-                print result
-            else:
-                hashpasslib.send_to_clipboard(result)
-                print "The password is in your clipboard."
+            result = make_password_maybe_agent(website, use_bcrypt=use_bcrypt)
+            present_password(result, show_result)
 
 if __name__ == "__main__":
     arguments = docopt(__doc__, version='HashPass 1.0')
+    if arguments["--kill"]:
+        try:
+            agent_client.send_shutdown()
+            print "Agent shutdown requested."
+            sys.exit(0)
+        except agent_client.AgentClientException:
+            print "Could not connect to agent."
+            print "It Might already be down."
+            sys.exit(-1)
     if arguments["--gui"]:
+        # Exec to the GUI client.
         os.execl("./hashpass-gui.py", *sys.argv)
         sys.exit(-1)
+    if arguments["--agent"]:
+        # Exec to the agent.
+        os.execl("./agent.py", *sys.argv)
+        sys.exit(-1)
     else:
+        # Run the CLI client.
         cli(arguments)
