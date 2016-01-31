@@ -32,11 +32,19 @@ def ping():
 
 
 def get_password(slug):
+    """
+    Ask the agent to make a password.
+
+    Returns: password or None
+    """
     res = _send_object({
         "type": "get_password",
         "slug": slug,
     })
-    return str(res["password"])
+    if "password" in res:
+        return str(res["password"])
+    else:
+        return None
 
 
 def send_shutdown():

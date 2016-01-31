@@ -65,6 +65,9 @@ def make_password_maybe_agent(website, use_bcrypt):
     if use_bcrypt:
         try:
             result = agent_client.get_password(website)
+            if result is None:
+                print "User canceled master entry."
+                sys.exit(-1)
             return result
         except agent_client.AgentClientException:
             pass
@@ -123,10 +126,12 @@ if __name__ == "__main__":
             sys.exit(-1)
     if arguments["--gui"]:
         # Exec to the GUI client.
+        os.chdir(os.path.dirname(os.path.abspath(__file__)))
         os.execl("./hashpass-gui.py", *sys.argv)
         sys.exit(-1)
     if arguments["--agent"]:
         # Exec to the agent.
+        os.chdir(os.path.dirname(os.path.abspath(__file__)))
         os.execl("./agent.py", *sys.argv)
         sys.exit(-1)
     else:
