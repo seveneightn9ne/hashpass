@@ -21,8 +21,7 @@ import hashpasslib
 
 # Set up logging.
 logging.basicConfig(filename="./agent.log", level=logging.DEBUG)
-# TODO(miles): disable logging?
-# logging.getLogger().disabled = True
+logging.getLogger().disabled = True
 
 
 # Credential lifetime in seconds.
