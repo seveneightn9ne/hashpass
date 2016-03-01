@@ -20,7 +20,7 @@ import pinentry
 import hashpasslib
 
 # Set up logging.
-logging.basicConfig(filename="./agent.log", level=logging.DEBUG)
+logging.basicConfig(filename="./agent.log", level=logging.DEBUG, disabled=True)
 logging.getLogger().disabled = True
 
 
