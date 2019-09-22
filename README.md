@@ -1,4 +1,4 @@
-#HashPass
+# HashPass
 HashPass deterministically generates secure passwords by combining your master password
 with a unique slug, e.g. the name of the service the password is for.
 
